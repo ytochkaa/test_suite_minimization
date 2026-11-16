@@ -15,6 +15,7 @@ import org.schemaanalyst.sqlrepresentation.expression.ConstantExpression;
 import org.schemaanalyst.sqlrepresentation.expression.Expression;
 import org.schemaanalyst.sqlrepresentation.expression.RelationalExpression;
 import org.schemaanalyst.testgeneration.TestCase;
+import org.schemaanalyst.testgeneration.TestSuite;
 import org.schemaanalyst.testgeneration.coveragecriterion.TestRequirement;
 import org.schemaanalyst.testgeneration.coveragecriterion.TestRequirementDescriptor;
 import org.schemaanalyst.testgeneration.coveragecriterion.predicate.checker.PredicateChecker;
@@ -34,12 +35,20 @@ final class SnapshotJsonExporter {
     private final DBMS dbms;
     private final List<TestRequirement> requirements;
     private final Set<TestRequirement> failedRequirements;
+    private final TestSuite exportedSuite;
+    private final List<TestCase> referenceTests;
 
     SnapshotJsonExporter(BaselineSnapshot snapshot) {
+        this(snapshot, snapshot.getTestSuite(), snapshot.getTestSuite().getTestCases());
+    }
+
+    SnapshotJsonExporter(BaselineSnapshot snapshot, TestSuite exportedSuite, List<TestCase> referenceTests) {
         this.snapshot = snapshot;
         this.dbms = DBMSFactory.instantiate("Postgres");
         this.requirements = snapshot.getRequirements();
         this.failedRequirements = new HashSet<>(snapshot.getFailedRequirements());
+        this.exportedSuite = exportedSuite;
+        this.referenceTests = new ArrayList<>(referenceTests);
     }
 
     Map<String, Object> export(String snapshotSha256) {
@@ -174,11 +183,11 @@ final class SnapshotJsonExporter {
 
     private List<Object> tests() {
         List<Object> result = array();
-        List<TestCase> tests = snapshot.getTestSuite().getTestCases();
+        List<TestCase> tests = exportedSuite.getTestCases();
         for (int index = 0; index < tests.size(); index++) {
             TestCase test = tests.get(index);
             Map<String, Object> testJson = object();
-            testJson.put("id", "T" + (index + 1));
+            testJson.put("id", stableTestId(test, index));
             testJson.put("expectedResult", test.getTestRequirement().getResult());
             testJson.put("sourceRequirementId", findRequirementId(test.getTestRequirement()));
             testJson.put("coveredRequirementIds", coveredRequirements(test));
@@ -191,6 +200,16 @@ final class SnapshotJsonExporter {
             result.add(testJson);
         }
         return result;
+    }
+
+    private String stableTestId(TestCase test, int reducedIndex) {
+        for (int index = 0; index < referenceTests.size(); index++) {
+            TestCase reference = referenceTests.get(index);
+            if (reference == test || reference.equals(test)) {
+                return "T" + (index + 1);
+            }
+        }
+        return "M" + (reducedIndex + 1);
     }
 
     private List<Object> data(Data data) {
