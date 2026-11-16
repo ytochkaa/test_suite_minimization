@@ -16,6 +16,11 @@ target_include_directories(minimizer_lib PUBLIC include)
 add_executable(test_suite_minimization src/main.cpp)
 target_link_libraries(test_suite_minimization PRIVATE minimizer_lib)
 
+enable_testing()
+add_executable(minimizer_tests tests/test_minimizer.cpp)
+target_link_libraries(minimizer_tests PRIVATE minimizer_lib)
+add_test(NAME minimizer_tests COMMAND minimizer_tests)
+
 if(MSVC)
     target_compile_options(minimizer_lib PRIVATE /W4)
 else()

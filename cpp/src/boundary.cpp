@@ -28,12 +28,19 @@ WideInteger parse_integer(const std::string& text) {
     return negative ? -value : value;
 }
 
-std::optional<std::string> value(const Operand& operand, const Row& row) {
-    if (operand.kind == "constant") return operand.value;
-    if (operand.kind != "column" || operand.table != row.table) return std::nullopt;
+struct ResolvedValue {
+    bool present = false;
+    bool is_null = false;
+    std::string text;
+};
+
+ResolvedValue value(const Operand& operand, const Row& row) {
+    if (operand.kind == "constant") return {true, false, operand.value};
+    if (operand.kind != "column" || operand.table != row.table) return {};
     auto found = row.values.find(operand.column);
-    if (found == row.values.end()) return std::nullopt;
-    return found->second;
+    if (found == row.values.end()) return {};
+    if (!found->second.has_value()) return {true, true, {}};
+    return {true, false, *found->second};
 }
 
 std::string truth(const std::string& op, WideInteger left, WideInteger right) {
@@ -52,17 +59,18 @@ std::optional<std::string> boundary_for(const Check& check, const Row& row) {
     const Operand& right_operand = *check.right;
     if (!integer_type(left_operand.type) || !integer_type(right_operand.type)) return std::nullopt;
 
-    auto left = value(left_operand, row);
-    auto right = value(right_operand, row);
-    bool left_null = !left.has_value();
-    bool right_null = !right.has_value();
+    ResolvedValue left = value(left_operand, row);
+    ResolvedValue right = value(right_operand, row);
+    if (!left.present || !right.present) return std::nullopt;
+    bool left_null = left.is_null;
+    bool right_null = right.is_null;
     if (left_null || right_null) {
         std::string category = left_null && right_null ? "both-null" : (left_null ? "left-null" : "right-null");
         return "B|" + check.id + "|" + category + "|unknown";
     }
 
-    WideInteger left_number = parse_integer(*left);
-    WideInteger right_number = parse_integer(*right);
+    WideInteger left_number = parse_integer(left.text);
+    WideInteger right_number = parse_integer(right.text);
     WideInteger distance = left_number - right_number;
     std::string category;
     if (distance == -1) category = "-1";

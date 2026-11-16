@@ -1,0 +1,55 @@
+{
+  "formatVersion": 1,
+  "snapshotSha256": "fixture-basic",
+  "schema": {
+    "checks": [
+      {
+        "id": "amount_min",
+        "table": "sample",
+        "expression": "amount >= 10",
+        "supported": true,
+        "operator": ">=",
+        "left": {"kind": "column", "table": "sample", "column": "amount", "type": "IntDataType"},
+        "right": {"kind": "constant", "value": "10", "type": "NumericValue"}
+      }
+    ]
+  },
+  "tests": [
+    {
+      "id": "T1",
+      "expectedResult": false,
+      "coveredRequirementIds": ["R_NEG"],
+      "state": [],
+      "data": [{"table": "sample", "values": {"amount": "9"}}],
+      "stateInsertCount": 0,
+      "dataInsertCount": 1
+    },
+    {
+      "id": "T2",
+      "expectedResult": true,
+      "coveredRequirementIds": ["R_POS"],
+      "state": [],
+      "data": [{"table": "sample", "values": {"amount": "10"}}],
+      "stateInsertCount": 0,
+      "dataInsertCount": 1
+    },
+    {
+      "id": "T3",
+      "expectedResult": true,
+      "coveredRequirementIds": ["R_POS"],
+      "state": [],
+      "data": [{"table": "sample", "values": {"amount": "11"}}],
+      "stateInsertCount": 0,
+      "dataInsertCount": 1
+    },
+    {
+      "id": "T4",
+      "expectedResult": true,
+      "coveredRequirementIds": ["R_POS"],
+      "state": [{"table": "parent", "values": {"id": "1"}}],
+      "data": [{"table": "sample", "values": {"amount": "30"}}],
+      "stateInsertCount": 1,
+      "dataInsertCount": 1
+    }
+  ]
+}
