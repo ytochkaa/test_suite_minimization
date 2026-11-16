@@ -730,68 +730,68 @@ class TestRequirements {
     +filterInfeasible()
 }
 class TestRequirement {
-    +getPredicate() Predicate
-    +getResult() Boolean
-    +getRequiresComparisonRow() boolean
++getPredicate() Predicate
++getResult() Boolean
++getRequiresComparisonRow() boolean
 }
 class TestSuiteGenerator {
-    +generate() TestSuite
-    #generateInitialTableData()
-    #generateTestCases()
++generate() TestSuite
+#generateInitialTableData()
+#generateTestCases()
 }
 class TestSuite {
-    +getTestCases() List
-    +countNumberOfInserts() int
++getTestCases() List
++countNumberOfInserts() int
 }
 class TestCase {
-    +getState() Data
-    +getData() Data
-    +getTestRequirement() TestRequirement
++getState() Data
++getData() Data
++getTestRequirement() TestRequirement
 }
 class ReductionFactory {
-    +reduceTestSuite(...) TestSuite
++reduceTestSuite(...) TestSuite
 }
 class Reduction {
-    +contextTableCreator()
-    +checkCoverage(int) boolean
-    +getReducedTestSuite() TestSuite
++contextTableCreator()
++checkCoverage(int) boolean
++getReducedTestSuite() TestSuite
 }
 class AdditionalGreedyReduction {
-    +reduceTestSuite() boolean
++reduceTestSuite() boolean
 }
 class BoundaryCoverageMatrix {
-    <<planned>>
-    +build(schema, suite, requirements)
+<<planned>>
++build(schema, suite, requirements)
 }
 class BoundaryAwareReducer {
-    <<planned>>
-    +reduce(suite, matrix) TestSuite
+<<planned>>
++reduce(suite, matrix) TestSuite
 }
 class BoundaryCoverageVerifier {
-    <<planned>>
-    +verify(schema, original, reduced, requirements) boolean
+<<planned>>
++verify(schema, original, reduced, requirements) boolean
 }
 
-CoverageCriterion ..> TestRequirements : возвращает
-TestRequirements "0..*" o-- "0..*" TestRequirement : содержит
-TestSuiteGenerator --> Schema : использует
-TestSuiteGenerator --> TestRequirements : хранит
-TestSuiteGenerator ..> TestSuite : создаёт
-TestSuite "0..*" o-- "0..*" TestCase : содержит
-TestCase --> TestRequirement : исходное требование
-ReductionFactory ..> AdditionalGreedyReduction : создаёт и запускает
+CoverageCriterion ..> TestRequirements 
+TestRequirements "0.." o-- "0.." TestRequirement
+TestSuiteGenerator --> Schema
+TestSuiteGenerator --> TestRequirements
+TestSuiteGenerator ..> TestSuite
+TestSuite "0.." o-- "0.." TestCase
+TestCase --> TestRequirement
+ReductionFactory ..> AdditionalGreedyReduction
 Reduction <|-- AdditionalGreedyReduction
-Reduction --> Schema : использует
-Reduction --> TestRequirements : хранит
-Reduction --> TestSuite : исходный и сокращённый
-BoundaryCoverageMatrix ..> Schema : анализирует ограничения
-BoundaryCoverageMatrix ..> TestRequirements : учитывает требования
-BoundaryCoverageMatrix ..> TestSuite : анализирует тесты
-BoundaryAwareReducer ..> BoundaryCoverageMatrix : использует
-BoundaryAwareReducer ..> TestSuite : принимает и возвращает
-BoundaryCoverageVerifier ..> Schema : проверяет ограничения
-BoundaryCoverageVerifier ..> TestSuite : сравнивает покрытие
-BoundaryCoverageVerifier ..> TestRequirements : пересчитывает покрытие
+Reduction --> Schema
+Reduction --> TestRequirements
+Reduction --> TestSuite
+BoundaryCoverageMatrix ..> Schema
+BoundaryCoverageMatrix ..> TestRequirements
+BoundaryCoverageMatrix ..> TestSuite
+BoundaryAwareReducer ..> BoundaryCoverageMatrix
+BoundaryAwareReducer ..> TestSuite
+BoundaryCoverageVerifier ..> Schema
+BoundaryCoverageVerifier ..> TestSuite
+BoundaryCoverageVerifier ..> TestRequirements
 ```
 
 Пунктирная стрелка означает использование другого класса, сплошная — связь,
