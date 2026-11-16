@@ -706,6 +706,142 @@ testing of relational schema integrity constraints across multiple database
 management systems," in Proceedings of the 6th International Conference on
 Software Testing, Verification and Validation. <a name="eleven"></a>
 
+## Как устроены генерация и сокращение тестов
+
+Этот раздел описывает часть SchemaAnalyst, которая нужна для курсовой работы.
+Сначала программа строит требования к тестам, затем подбирает для них данные.
+После этого редуктор пытается оставить меньше тестов, сохранив покрытие требований.
+
+На диаграмме показаны основные классы. Из готовых редукторов для примера выбран
+Additional Greedy. Классы с пометкой `planned` пока только предлагаются для
+курсовой: их названия и методы ещё могут измениться.
+
+```mermaid
+classDiagram
+direction TB
+
+class Schema
+class CoverageCriterion {
+    <<abstract>>
+    +generateRequirements() TestRequirements
+}
+class TestRequirements {
+    +reduce()
+    +filterInfeasible()
+}
+class TestRequirement {
+    +getPredicate() Predicate
+    +getResult() Boolean
+    +getRequiresComparisonRow() boolean
+}
+class TestSuiteGenerator {
+    +generate() TestSuite
+    #generateInitialTableData()
+    #generateTestCases()
+}
+class TestSuite {
+    +getTestCases() List
+    +countNumberOfInserts() int
+}
+class TestCase {
+    +getState() Data
+    +getData() Data
+    +getTestRequirement() TestRequirement
+}
+class ReductionFactory {
+    +reduceTestSuite(...) TestSuite
+}
+class Reduction {
+    +contextTableCreator()
+    +checkCoverage(int) boolean
+    +getReducedTestSuite() TestSuite
+}
+class AdditionalGreedyReduction {
+    +reduceTestSuite() boolean
+}
+class BoundaryCoverageMatrix {
+    <<planned>>
+    +build(schema, suite, requirements)
+}
+class BoundaryAwareReducer {
+    <<planned>>
+    +reduce(suite, matrix) TestSuite
+}
+class BoundaryCoverageVerifier {
+    <<planned>>
+    +verify(schema, original, reduced, requirements) boolean
+}
+
+CoverageCriterion ..> TestRequirements : возвращает
+TestRequirements "0..*" o-- "0..*" TestRequirement : содержит
+TestSuiteGenerator --> Schema : использует
+TestSuiteGenerator --> TestRequirements : хранит
+TestSuiteGenerator ..> TestSuite : создаёт
+TestSuite "0..*" o-- "0..*" TestCase : содержит
+TestCase --> TestRequirement : исходное требование
+ReductionFactory ..> AdditionalGreedyReduction : создаёт и запускает
+Reduction <|-- AdditionalGreedyReduction
+Reduction --> Schema : использует
+Reduction --> TestRequirements : хранит
+Reduction --> TestSuite : исходный и сокращённый
+BoundaryCoverageMatrix ..> Schema : анализирует ограничения
+BoundaryCoverageMatrix ..> TestRequirements : учитывает требования
+BoundaryCoverageMatrix ..> TestSuite : анализирует тесты
+BoundaryAwareReducer ..> BoundaryCoverageMatrix : использует
+BoundaryAwareReducer ..> TestSuite : принимает и возвращает
+BoundaryCoverageVerifier ..> Schema : проверяет ограничения
+BoundaryCoverageVerifier ..> TestSuite : сравнивает покрытие
+BoundaryCoverageVerifier ..> TestRequirements : пересчитывает покрытие
+```
+
+Пунктирная стрелка означает использование другого класса, сплошная — связь,
+которая хранится в объекте. Пустой ромб обозначает коллекцию объектов,
+а треугольник — наследование. Один тест может входить сразу в несколько наборов,
+например в исходный и сокращённый. Поэтому здесь нет строгого владения тестом
+только одним набором. Знак `+` обозначает публичный метод, `#` — защищённый.
+
+### Что делают классы и методы
+
+| Класс | Для чего нужен и что делают основные методы |
+|---|---|
+| `Schema` | Хранит описание таблиц, столбцов и ограничений базы. Это входные данные для генерации и проверки тестов. |
+| `CoverageCriterion` | Задаёт общий метод `generateRequirements()`, который возвращает требования к тестам. Конкретные критерии, например CondAICC, определяют, какие проверки нужны. |
+| `TestRequirements` | Хранит список требований. `reduce()` объединяет требования с одинаковыми упрощёнными условиями и сохраняет их описания. `filterInfeasible()` убирает требования, для которых невыполнимость видна после упрощения. Это ещё не сокращение тестового набора. |
+| `TestRequirement` | Описывает одну проверку. `getPredicate()` возвращает условие для подбора данных, `getResult()` — ожидаемый результат, а `getRequiresComparisonRow()` сообщает, нужна ли дополнительная строка для сравнения, например при проверке уникальности. |
+| `TestSuiteGenerator` | Создаёт набор тестов. `generateInitialTableData()` подготавливает исходные строки таблиц, `generateTestCases()` подбирает данные по требованиям, а `generate()` запускает эти этапы и возвращает набор. |
+| `TestSuite` | Хранит тесты. `getTestCases()` возвращает копию списка, но сами тесты остаются теми же объектами. `countNumberOfInserts()` считает строки подготовки и проверяемые строки во всём наборе. |
+| `TestCase` | Представляет один тест. `getState()` возвращает строки, которые нужно добавить заранее, `getData()` — проверяемые строки, `getTestRequirement()` — исходное требование. |
+| `ReductionFactory` | В методе `reduceTestSuite(...)` выбирает редуктор по имени, запускает его и проверку покрытия, затем возвращает сокращённый набор. |
+| `Reduction` | Содержит общие действия редукторов. `contextTableCreator()` определяет, какие требования покрывает каждый тест, и дополняет их описания. `checkCoverage()` проверяет покрытие по правилам текущей реализации, включая сравнение описаний и условий. `getReducedTestSuite()` собирает выбранные тесты. |
+| `AdditionalGreedyReduction` | Наследует общие действия от `Reduction`. В `reduceTestSuite()` выбирает тест с наибольшим числом ещё не покрытых требований. После выбора пересчитывает, сколько новых требований могут покрыть остальные тесты. |
+| `BoundaryCoverageMatrix` — планируется | Метод `build(...)` должен составить таблицу: какой тест покрывает какие требования и границы. После построения эта таблица не должна меняться при сокращении. |
+| `BoundaryAwareReducer` — планируется | Метод `reduce(...)` должен выбирать целые тесты по таблице покрытия и сохранять найденные в исходном наборе границы. Новые данные на этом этапе не генерируются. |
+| `BoundaryCoverageVerifier` — планируется | Метод `verify(...)` должен заново проверить требования и границы по данным исходного и сокращённого наборов. Он не должен считать перенесённые описания требований доказательством покрытия. |
+
+### Зачем учитывать границы отдельно
+
+Для условия `amount >= 10` значения 10 и 100 подходят одинаково, но тест со
+значением 10 проверяет саму границу. Если при сокращении останется только 100,
+проверка условия может сохраниться, а проверка границы — потеряться.
+
+В курсовой предлагается отдельно учитывать значения на расстоянии −1, 0 и +1
+от границы. Для сравнения `x op c` это разность `x - c`, для `x op y` — `x - y`.
+Разность нужно считать без переполнения, например через `BigInteger`.
+NULL учитывается отдельно и не считается числовой границей.
+
+Одного подходящего числа недостаточно. Нужно проверить исходное состояние базы
+и остальные ограничения. Например, отказ из-за неверного внешнего ключа ещё
+не означает, что тест проверил границу CHECK.
+
+На первом этапе новый редуктор должен выбирать целые тесты, не объединяя их
+состояния. Каждый редуктор нужно запускать на независимой копии одного и того же
+исходного набора. Повторная генерация с тем же seed сама по себе не доказывает,
+что входные данные совпали.
+
+Это предложение для будущей реализации. Пока эксперименты не завершены,
+нельзя утверждать, что новый подход лучше готовых редукторов. Сохранение границ
+также не гарантирует, что набор найдёт все ошибки, которые находил до сокращения.
+
 ## License
 
 [GNU General Public License v3.0](./LICENSE.txt)
