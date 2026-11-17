@@ -1,17 +1,18 @@
 # Сборка и запуск тестов
 
-Инструкция для Windows и текущей структуры SchemaAnalyst + C++ reducer. Все команды запускаются из корня репозитория `test_suite_minimization`.
+Инструкция для Windows и раздельной структуры SchemaAnalyst + `test_suite_minimization`. Все команды запускаются из корня репозитория.
 
 ## Где находятся исходники и тесты
 
 | Что искать | Путь |
 |---|---|
-| Java production-код SchemaAnalyst | `src\main\java` |
-| Java unit-тесты | `src\test\java\org\schemaanalyst\unittest` |
-| Основной список Java-тестов | `src\test\java\org\schemaanalyst\unittest\AllTests.java` |
-| C++ unit/regression test | `cpp\tests\test_minimizer.cpp` |
-| Регистрация C++ теста в CTest | `cpp\CMakeLists.txt` |
-| JSON fixture для проверки PostgreSQL | `experiments\fixtures\postgres-boundaries.json` |
+| Java production-код SchemaAnalyst | `SchemaAnalyst\src\main\java` |
+| Java unit-тесты SchemaAnalyst | `SchemaAnalyst\src\test\java\org\schemaanalyst\unittest` |
+| Основной список Java-тестов | `SchemaAnalyst\src\test\java\org\schemaanalyst\unittest\AllTests.java` |
+| Java-обвязки эксперимента | `test_suite_minimization\src\main\java\org\schemaanalyst\minimization` |
+| C++ unit/regression test | `test_suite_minimization\cpp\tests\test_minimizer.cpp` |
+| Регистрация C++ теста в CTest | `test_suite_minimization\cpp\CMakeLists.txt` |
+| JSON fixture для проверки PostgreSQL | `test_suite_minimization\experiments\fixtures\postgres-boundaries.json` |
 | Ручной SQL NULL oracle | `..\schemaanalyst_experiments\manual_null_oracle.sql` |
 
 В VS Code откройте корень репозитория. Java-тесты можно просматривать в Explorer по пути выше; если установлен **Test Runner for Java**, они также появятся в панели **Testing**. Для C++ после конфигурации откройте панель CMake/CTest или используйте `ctest -N`, чтобы вывести зарегистрированные тесты. CLI-команды ниже работают независимо от наличия расширений VS Code.
@@ -23,62 +24,62 @@
 - Для C++: CMake, Ninja и C++17-компилятор. Проверенная конфигурация использовала MSYS2 MinGW-w64.
 - Для полной экспериментальной матрицы: локальный PostgreSQL и утилиты `psql.exe` и `createdb.exe`.
 
-Сценарий `experiments\run_matrix.ps1` по умолчанию ожидает JDK в соседнем каталоге `..\..\schemaanalyst_experiments\runtime\jdk8u512-b09` и использует пути `C:\msys64\mingw64\bin` и `C:\Program Files\PostgreSQL\18\bin`. Для другой установки укажите `-JavaHome`/`-DependencyBuild` и при необходимости измените пути к CMake, компилятору, CTest и PostgreSQL в начале сценария.
+Сценарий `test_suite_minimization\experiments\run_matrix.ps1` по умолчанию ожидает JDK в соседнем каталоге `..\schemaanalyst_experiments\runtime\jdk8u512-b09` и использует SchemaAnalyst из `SchemaAnalyst`. Для другой установки укажите `-JavaHome`/`-DependencyBuild` и при необходимости измените пути к CMake, компилятору, CTest и PostgreSQL в начале сценария.
 
 ## Собрать SchemaAnalyst
 
 В PowerShell из корня проекта:
 
 ```powershell
-.\gradlew.bat compile --offline --no-daemon
+.\SchemaAnalyst\gradlew.bat -p .\SchemaAnalyst compile --offline --no-daemon
 ```
 
 `--offline` использует уже загруженные зависимости. При первой сборке без локального кэша удалите этот параметр, чтобы Gradle мог скачать зависимости:
 
 ```powershell
-.\gradlew.bat compile --no-daemon
+.\SchemaAnalyst\gradlew.bat -p .\SchemaAnalyst compile --no-daemon
 ```
 
-Основные результаты сборки находятся в `build\classes\java\main` и `build\lib`.
+Сборка Gradle дополнительно подключает Java-обвязки из `test_suite_minimization\src\main\java`. Основные результаты находятся в `SchemaAnalyst\build\classes\java\main` и `SchemaAnalyst\build\lib`.
 
 ## Запустить Java-тесты
 
 Полный набор:
 
 ```powershell
-.\gradlew.bat test --offline --no-daemon
+.\SchemaAnalyst\gradlew.bat -p .\SchemaAnalyst test --offline --no-daemon
 ```
 
 Один класс:
 
 ```powershell
-.\gradlew.bat test --tests 'org.schemaanalyst.unittest.dbms.TestPostgres' --offline --no-daemon
+.\SchemaAnalyst\gradlew.bat -p .\SchemaAnalyst test --tests 'org.schemaanalyst.unittest.dbms.TestPostgres' --offline --no-daemon
 ```
 
 Результаты:
 
-- HTML-отчёт: `build\reports\tests\test\index.html`;
-- XML-результаты по классам: `build\test-results\test\TEST-*.xml`.
+- HTML-отчёт: `SchemaAnalyst\build\reports\tests\test\index.html`;
+- XML-результаты по классам: `SchemaAnalyst\build\test-results\test\TEST-*.xml`.
 
-Если нужно показать тесты в отчёте или на защите, откройте HTML-отчёт в браузере. В нём видны количество тестов, ошибки и stack trace. На проверенной конфигурации полный набор имел 1715 тестов и 15 известных ошибок: проблемы legacy JDBC с PostgreSQL SCRAM, NPE в части старых case-study tests и несовпадение ожидаемого количества мутантов. Поэтому не трактуйте `test` как полностью зелёный запуск; детали зафиксированы в [RESULTS_BASELINE.md](../RESULTS_BASELINE.md).
+Если нужно показать тесты в отчёте или на защите, откройте HTML-отчёт в браузере. В нём видны количество тестов, ошибки и stack trace. На проверенной конфигурации полный набор имел 1715 тестов и 15 известных ошибок: проблемы legacy JDBC с PostgreSQL SCRAM, NPE в части старых case-study tests и несовпадение ожидаемого количества мутантов. Поэтому не трактуйте `test` как полностью зелёный запуск; детали зафиксированы в [RESULTS_BASELINE.md](./RESULTS_BASELINE.md).
 
 ## Собрать и проверить C++ reducer
 
 ```powershell
-& 'C:\msys64\mingw64\bin\cmake.exe' -S .\cpp -B .\build\cpp -G Ninja "-DCMAKE_CXX_COMPILER=C:\msys64\mingw64\bin\g++.exe"
-& 'C:\msys64\mingw64\bin\cmake.exe' --build .\build\cpp
-& 'C:\msys64\mingw64\bin\ctest.exe' --test-dir .\build\cpp -N
-& 'C:\msys64\mingw64\bin\ctest.exe' --test-dir .\build\cpp --output-on-failure
+& 'C:\msys64\mingw64\bin\cmake.exe' -S .\test_suite_minimization\cpp -B .\test_suite_minimization\build\cpp -G Ninja "-DCMAKE_CXX_COMPILER=C:\msys64\mingw64\bin\g++.exe"
+& 'C:\msys64\mingw64\bin\cmake.exe' --build .\test_suite_minimization\build\cpp
+& 'C:\msys64\mingw64\bin\ctest.exe' --test-dir .\test_suite_minimization\build\cpp -N
+& 'C:\msys64\mingw64\bin\ctest.exe' --test-dir .\test_suite_minimization\build\cpp --output-on-failure
 ```
 
-`ctest -N` только показывает зарегистрированные тесты; последняя команда выполняет их. В текущем проекте зарегистрирован `minimizer_tests`, исходник — `cpp\tests\test_minimizer.cpp`.
+`ctest -N` только показывает зарегистрированные тесты; последняя команда выполняет их. В текущем проекте зарегистрирован `minimizer_tests`, исходник — `test_suite_minimization\cpp\tests\test_minimizer.cpp`.
 
 Чтобы запустить C++-программу вручную на JSON:
 
 ```powershell
-.\build\cpp\test_suite_minimization.exe `
-  .\experiments\fixtures\postgres-boundaries.json `
-  .\build\cpp\fixture-report.json
+.\test_suite_minimization\build\cpp\test_suite_minimization.exe `
+  .\test_suite_minimization\experiments\fixtures\postgres-boundaries.json `
+  .\test_suite_minimization\build\cpp\fixture-report.json
 ```
 
 Программа печатает число входных тестов, требований и границ, а полный отчёт записывает в указанный выходной JSON.
@@ -102,14 +103,14 @@
 Чтобы разрешить выполнение скрипта только для этого процесса PowerShell и передать массив генераторов без ошибок привязки аргументов:
 
 ```powershell
-$script = (Resolve-Path '.\experiments\run_matrix.ps1').Path
+$script = (Resolve-Path '.\test_suite_minimization\experiments\run_matrix.ps1').Path
 $commandText = "& '$script' -Generators @('avsDefaults','randomDefaults','dominoRandom','dominoAVS') -Seeds @(0) -Budget 10000"
 powershell.exe -NoProfile -ExecutionPolicy Bypass -Command $commandText
 ```
 
 Для быстрого прогона одного генератора замените список на `@('avsDefaults')`. Не запускайте редукторы вручную на результатах друг друга: сценарий сам перечитывает общий исходный `.ser` для каждого метода.
 
-Для каждого запуска создаётся новая папка `experiments\results\matrix-<run-id>`. В ней:
+Для каждого запуска создаётся новая папка `test_suite_minimization\experiments\results\matrix-<run-id>`. В ней:
 
 - `summary.csv` — число исходных/итоговых тестов и INSERT, время, покрытие, потерянные обязанности и статус PostgreSQL;
 - `*-full-postgres.csv` — фактические результаты PostgreSQL для исходного набора;
@@ -121,7 +122,7 @@ powershell.exe -NoProfile -ExecutionPolicy Bypass -Command $commandText
 Показать сводку последнего запуска можно так:
 
 ```powershell
-$run = Get-ChildItem .\experiments\results -Directory -Filter 'matrix-*' |
+$run = Get-ChildItem .\test_suite_minimization\experiments\results -Directory -Filter 'matrix-*' |
   Sort-Object LastWriteTime -Descending |
   Select-Object -First 1
 Import-Csv (Join-Path $run.FullName 'summary.csv') |

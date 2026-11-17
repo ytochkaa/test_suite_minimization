@@ -1,6 +1,6 @@
 param(
-    [string]$JavaHome = (Join-Path $PSScriptRoot '..\..\schemaanalyst_experiments\runtime\jdk8u512-b09'),
-    [string]$DependencyBuild = (Join-Path $PSScriptRoot '..'),
+    [string]$JavaHome = (Join-Path $PSScriptRoot '..\..\..\schemaanalyst_experiments\runtime\jdk8u512-b09'),
+    [string]$DependencyBuild = (Join-Path $PSScriptRoot '..\..\SchemaAnalyst'),
     [int[]]$Seeds = @(0),
     [int]$Budget = 10000,
     [string[]]$Generators = @('avsDefaults', 'randomDefaults', 'dominoRandom', 'dominoAVS'),
@@ -12,9 +12,9 @@ param(
 
 $ErrorActionPreference = 'Stop'
 $root = (Resolve-Path (Join-Path $PSScriptRoot '..')).Path
-Set-Location -LiteralPath $root
 $javaHomePath = (Resolve-Path $JavaHome).Path
 $dependencyPath = (Resolve-Path $DependencyBuild).Path
+Set-Location -LiteralPath $dependencyPath
 $java = Join-Path $javaHomePath 'bin\java.exe'
 $javac = Join-Path $javaHomePath 'bin\javac.exe'
 $classes = Join-Path $root 'build\classes\java\main'

@@ -15,18 +15,18 @@
 
 ## Подтверждённые запуски
 
-- SchemaAnalyst собран командой `gradlew compile --offline --no-daemon`; JDK — Eclipse Temurin 8u512-b09, Gradle wrapper — 4.10.2.
+- SchemaAnalyst собран командой `.\SchemaAnalyst\gradlew.bat -p .\SchemaAnalyst compile --offline --no-daemon`; JDK — Eclipse Temurin 8u512-b09, Gradle wrapper — 4.10.2.
 - Экспериментальные Java-классы успешно скомпилированы.
 - C++-проект собрался; CTest завершился успешно (1/1).
 - PostgreSQL 18.7 на `127.0.0.1:55432` выполнил семь случаев ручного NULL oracle; ожидаемые и фактические результаты совпали во всех случаях.
 - Матрица `CondAICC`, seed 0, budget 10000 выполнена для четырёх генераторов и шести штатных редукторов; для каждого дополнительно проверен `boundaryAware`.
 - Во всех 28 результатах редукции фактическое поведение PostgreSQL совпало с ожиданием. Каждый исходный снимок подтверждён общим SHA-256 для всех его редукторов.
-- `boundaryAware` сохранил все обнаруженные подтверждённые требования и границы в четырёх запусках. Потери штатных редукторов и STICCER перечислены в [RESULTS_BASELINE.md](../RESULTS_BASELINE.md).
+- `boundaryAware` сохранил все обнаруженные подтверждённые требования и границы в четырёх запусках. Потери штатных редукторов и STICCER перечислены в [RESULTS_BASELINE.md](./RESULTS_BASELINE.md).
 
-Полный набор воспроизводимых CSV, JSON, логов и снимков: [matrix-20261117-025251-6b4a30af](../experiments/results/matrix-20261117-025251-6b4a30af). Формат evidence описан в [FORMAT.md](../experiments/FORMAT.md).
+Полный набор воспроизводимых CSV, JSON, логов и снимков: [matrix-20261117-025251-6b4a30af](../test_suite_minimization/experiments/results/matrix-20261117-025251-6b4a30af). Формат evidence описан в [FORMAT.md](../test_suite_minimization/experiments/FORMAT.md).
 
 ## Дополнительное ограничение
 
-Полный Gradle test report содержит 15 ошибок из 1715 тестов: PostgreSQL JDBC сообщил `The authentication type 10 is not supported`; также зарегистрированы `NullPointerException` в тестах `TestDataTypes` и `TestSchema.testParsedCaseStudies`, а `TestPKCColumnE.testDoublePKTwoExchange` ожидал 8 мутантов вместо полученных 7. Эти ошибки не входят в матричные результаты; подробные XML находятся в `build/test-results/test`.
+Полный Gradle test report содержит 15 ошибок из 1715 тестов: PostgreSQL JDBC сообщил `The authentication type 10 is not supported`; также зарегистрированы `NullPointerException` в тестах `TestDataTypes` и `TestSchema.testParsedCaseStudies`, а `TestPKCColumnE.testDoublePKTwoExchange` ожидал 8 мутантов вместо полученных 7. Эти ошибки не входят в матричные результаты; подробные XML находятся в `SchemaAnalyst/build/test-results/test`.
 
 Матрица использует только seed 0 и одну схему. Она подтверждает работоспособность прототипа и конкретные потери на выбранных снимках, но не даёт статистического вывода о поведении на других seeds или схемах.

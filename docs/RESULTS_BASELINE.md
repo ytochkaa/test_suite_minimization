@@ -1,6 +1,8 @@
 # Результаты базовых экспериментов
 
-Дата прогона: 17.11.2026. Полный набор артефактов и исходные логи: [experiments/results/matrix-20261117-025251-6b4a30af](experiments/results/matrix-20261117-025251-6b4a30af). Сводная таблица: [summary.csv](experiments/results/matrix-20261117-025251-6b4a30af/summary.csv).
+Дата прогона: 17.11.2026. Полный набор артефактов и исходные логи: [experiments/results/matrix-20261117-025251-6b4a30af](../test_suite_minimization/experiments/results/matrix-20261117-025251-6b4a30af). Сводная таблица: [summary.csv](../test_suite_minimization/experiments/results/matrix-20261117-025251-6b4a30af/summary.csv).
+
+Пути в сохранённых командах и сообщениях об ошибках отражают фактические запуски до реорганизации каталогов. Актуальные команды приведены в [BUILD_AND_TESTS.md](./BUILD_AND_TESTS.md).
 
 ## Условия и воспроизводимость
 
@@ -124,7 +126,7 @@ STICCER также сформировал дополнительные набл�
 
 Все **28** результатов редуктора совпали с ожидаемым поведением PostgreSQL; каждый полный исходный набор также проверен: `avsDefaults` 24/24, `randomDefaults` 24/24, `dominoRandom` 24/24, `dominoAVS` 16/16. В полных наборах первых трёх генераторов фактические результаты: 13 успешных вставок, 3 ошибки `23502`, 3 ошибки `23505`, 1 ошибка `23503`, 4 ошибки `23514`. Для `dominoAVS`: 8 успешных, 2 `23502`, 1 `23505`, 1 `23503`, 4 `23514`. У всех строк `matches_expected=True`.
 
-Отдельно выполнен [manual_null_oracle.sql](../schemaanalyst_experiments/manual_null_oracle.sql) на PostgreSQL 18.7; фактический вывод psql сохранён в [manual-null-oracle-direct.log](../schemaanalyst_experiments/results/baseline-20261116/manual-null-oracle-direct.log). Выражение `((x > 0 AND y > 0) IS NOT FALSE)` дало совпадение 7/7:
+Отдельно выполнен [manual_null_oracle.sql](../../schemaanalyst_experiments/manual_null_oracle.sql) на PostgreSQL 18.7; фактический вывод psql сохранён в [manual-null-oracle-direct.log](../../schemaanalyst_experiments/results/baseline-20261116/manual-null-oracle-direct.log). Выражение `((x > 0 AND y > 0) IS NOT FALSE)` дало совпадение 7/7:
 
 | x | y | Ожидаемое принятие | Фактическое принятие |
 |---|---|---|---|
@@ -140,7 +142,7 @@ STICCER также сформировал дополнительные набл�
 
 **Подтверждено запуском:**
 
-- `gradlew compile --offline --no-daemon` и компиляция экспериментальных Java-классов завершились успешно.
+- `.\SchemaAnalyst\gradlew.bat -p .\SchemaAnalyst compile --offline --no-daemon` и компиляция экспериментальных Java-классов завершились успешно.
 - C++-проект собрался; CTest: 1/1 тест пройден. Регрессионный тест подтверждает, что FK-ошибка не засчитывается как покрытие CHECK.
 - Схема, генерация, экспорт, запуск шести штатных методов, C++-проверка и выполнение итоговых SQL-тестов в PostgreSQL завершились для всех четырёх генераторов.
 - `boundaryAware` сохранил все обнаруженные в исходном наборе требования и подтверждённые граничные наблюдения во всех четырёх запусках.
@@ -220,7 +222,7 @@ STICCER также сформировал дополнительные набл�
 
    В исходном вызове сочетались `-Force` и `-Value`; параметр исправлен на `-NotePropertyValue`, после чего smoke и полный прогон прошли.
 
-В сохранённом Gradle XML-отчёте также зафиксированы **15 ошибок из 1715 тестов**: 10 PostgreSQL-ошибок с сообщением `The authentication type 10 is not supported`; два `NullPointerException` в `TestDataTypes`; два `NullPointerException` в `TestSchema.testParsedCaseStudies`; и `AssertionError` в `TestPKCColumnE.testDoublePKTwoExchange` (`expected:<8> but was:<7>`). Подробности находятся в [TEST-org.schemaanalyst.unittest.dbms.TestPostgres.xml](build/test-results/test/TEST-org.schemaanalyst.unittest.dbms.TestPostgres.xml), [TEST-org.schemaanalyst.unittest.sqlrepresentation.datatype.TestDataTypes.xml](build/test-results/test/TEST-org.schemaanalyst.unittest.sqlrepresentation.datatype.TestDataTypes.xml), [TEST-org.schemaanalyst.unittest.sqlrepresentation.TestSchema.xml](build/test-results/test/TEST-org.schemaanalyst.unittest.sqlrepresentation.TestSchema.xml) и [TEST-org.schemaanalyst.unittest.mutation.operator.TestPKCColumnE.xml](build/test-results/test/TEST-org.schemaanalyst.unittest.mutation.operator.TestPKCColumnE.xml). Исходная командная строка полного Gradle test-прогона не сохранилась; эти тесты не являются частью успешной PostgreSQL-валидации матрицы.
+В сохранённом Gradle XML-отчёте также зафиксированы **15 ошибок из 1715 тестов**: 10 PostgreSQL-ошибок с сообщением `The authentication type 10 is not supported`; два `NullPointerException` в `TestDataTypes`; два `NullPointerException` в `TestSchema.testParsedCaseStudies`; и `AssertionError` в `TestPKCColumnE.testDoublePKTwoExchange` (`expected:<8> but was:<7>`). Подробности находятся в [TEST-org.schemaanalyst.unittest.dbms.TestPostgres.xml](../SchemaAnalyst/build/test-results/test/TEST-org.schemaanalyst.unittest.dbms.TestPostgres.xml), [TEST-org.schemaanalyst.unittest.sqlrepresentation.datatype.TestDataTypes.xml](../SchemaAnalyst/build/test-results/test/TEST-org.schemaanalyst.unittest.sqlrepresentation.datatype.TestDataTypes.xml), [TEST-org.schemaanalyst.unittest.sqlrepresentation.TestSchema.xml](../SchemaAnalyst/build/test-results/test/TEST-org.schemaanalyst.unittest.sqlrepresentation.TestSchema.xml) и [TEST-org.schemaanalyst.unittest.mutation.operator.TestPKCColumnE.xml](../SchemaAnalyst/build/test-results/test/TEST-org.schemaanalyst.unittest.mutation.operator.TestPKCColumnE.xml). Исходная командная строка полного Gradle test-прогона не сохранилась; эти тесты не являются частью успешной PostgreSQL-валидации матрицы.
 
 ## Решение о дальнейшей реализации
 

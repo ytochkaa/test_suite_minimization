@@ -1,187 +1,185 @@
-# SchemaAnalyst: генерация и сокращение тестов
+# SchemaAnalyst и test_suite_minimization
 
-Этот репозиторий содержит исходный Java-проект SchemaAnalyst и практическую
-часть курсовой работы `test_suite_minimization`: воспроизводимый эксперимент,
-проверку тестовых данных в PostgreSQL и C++-прототип редуктора с сохранением
-граничных обязательств.
-
-## Как устроен рабочий каталог
-
-В рабочем каталоге `Courswork` проекты хранятся отдельно:
+Репозиторий разделён на два проекта и отдельный каталог документов:
 
 ```text
-Courswork/
-├── schemaanalyst/schemaanalyst/  # отдельная копия исходного проекта SchemaAnalyst
-└── test_suite_minimization/      # этот репозиторий и материалы курсовой
+.
+├── SchemaAnalyst/                 # исходный Java-проект и его сборка
+├── test_suite_minimization/       # код и сценарии практической части
+├── docs/                          # руководство, отчёты и материалы курсовой
+├── .github/workflows/build.yml    # проверка README в GitHub Actions
+├── .gitignore                     # правила исключения локальных файлов
+├── .mdlrc                         # настройки Markdown lint
+├── LICENSE.txt                    # лицензия
+└── README.md                      # это описание структуры
 ```
 
-Этот README относится к `test_suite_minimization`. Внутри репозитория файлы
-сгруппированы по назначению в разделы **SchemaAnalyst** и
-**test_suite_minimization**. Чтобы не ломать существующую сборку Java, исходники
-SchemaAnalyst оставлены в их обычных каталогах (`src`, `casestudies`,
-`config`); они не перемещались. Полный прежний README сохранён в
-[старое описание.md](./старое%20описание.md).
+SchemaAnalyst содержит генерацию тестовых данных и штатные редукторы.
+`test_suite_minimization` добавляет Java-обвязку экспериментов, C++-редуктор и
+проверку PostgreSQL. Документы и отчёты находятся отдельно в `docs/`.
 
-## SchemaAnalyst — базовый Java-проект
+## `SchemaAnalyst/`
 
-SchemaAnalyst генерирует наборы тестовых данных для проверки ограничений
-реляционной схемы. Java-часть и её исходная структура находятся в этом
-репозитории, а отдельная исходная копия — в `..\schemaanalyst\schemaanalyst`.
-
-### Основные каталоги
+### Каталоги
 
 | Путь | Назначение |
 |---|---|
-| `src/main/java` | Основной Java-код: модель схемы, генераторы данных, критерии покрытия, редукторы и анализ мутантов. |
-| `src/test/java` | Java unit- и integration-тесты. Основной агрегатор тестов: `org.schemaanalyst.unittest.AllTests`. |
-| `casestudies` | SQL-схемы и наборы case study, используемые генерацией и экспериментами. |
-| `config` | Конфигурация СУБД, путей, логирования и экспериментов. |
-| `lib` | Подключённые Java/Ant/Jacoco библиотеки. |
-| `scripts` | Скрипты запуска анализа, экспериментов, проверки SQL и обновления настроек. |
-| `gradle/wrapper` | Компоненты Gradle Wrapper, позволяющие собирать проект без отдельной установки Gradle. |
-| `.github/workflows` | Настройки автоматической сборки в GitHub Actions. |
+| `SchemaAnalyst/src/main/java` | Основной Java-код SchemaAnalyst: модель схемы, генераторы, критерии покрытия и редукторы. |
+| `SchemaAnalyst/src/test/java` | Java unit- и integration-тесты; агрегатор — `org.schemaanalyst.unittest.AllTests`. |
+| `SchemaAnalyst/src/paper` | Материалы, связанные с публикациями и исследовательской частью исходного проекта. |
+| `SchemaAnalyst/casestudies` | SQL-схемы и исходные данные примеров для генерации и экспериментов. |
+| `SchemaAnalyst/config` | Конфигурация СУБД, путей, логирования и экспериментов. |
+| `SchemaAnalyst/gradle/wrapper` | Компоненты Gradle Wrapper. |
+| `SchemaAnalyst/lib` | Подключённые Java, Ant и Jacoco библиотеки. |
+| `SchemaAnalyst/scripts` | Сценарии анализа, экспериментов и обновления конфигурации. |
 
-### Файлы SchemaAnalyst в корне
-
-| Файл | Назначение |
-|---|---|
-| `.gitignore` | Исключает локальные сборки, временные файлы и локальную конфигурацию из Git. |
-| `.mdlrc` | Настройки проверки Markdown. |
-| `.github/workflows/build.yml` | CI-сценарий сборки проекта в GitHub Actions. |
-| `build.gradle` | Основная Gradle-сборка Java-проекта и его задач. |
-| `build.xml` | Сборка Ant, используемая некоторыми экспериментальными сценариями. |
-| `settings.gradle` | Настройки Gradle-проекта. |
-| `gradlew`, `gradlew.bat` | Unix- и Windows-обёртки Gradle. |
-| `gradle/wrapper/gradle-wrapper.jar` | Исполняемая часть Gradle Wrapper. |
-| `gradle/wrapper/gradle-wrapper.properties` | Версия Gradle и параметры загрузки Wrapper. |
-| `LICENSE.txt` | Лицензия исходного проекта. |
-| `schemaanalyst-logo-gh.png` | Изображение SchemaAnalyst. |
-| `ukwac_char_lm` | Файл языковой модели, используемый компонентом `LangModel` генерации данных. |
-| `run-analysepipeline.sh` | Запуск анализа схем через pipeline. |
-| `run-mutant-timing.sh` | Замер времени анализа мутантов. |
-| `run-options-random.sh` | Эксперименты с параметрами генерации и случайным выбором. |
-| `run-options-random-fullreduce.sh` | Вариант эксперимента с дополнительным полным сокращением. |
-| `run-virtual.sh` | Запуск виртуального анализа мутантов. |
-| `run-virtual-timing.sh` | Вариант виртуального анализа с замером времени. |
-| `SampleReductionExperimentRunner.sh` | Обёртка для запуска серии экспериментов по сокращению. |
-
-### Конфигурационные файлы
+### Файлы сборки и запуска
 
 | Файл | Назначение |
 |---|---|
-| `config/capture.properties` | Настройки захвата/сохранения экспериментальных данных. |
-| `config/database.properties` | Параметры подключения к СУБД. |
-| `config/experiment.properties` | Настройки экспериментальных запусков. |
-| `config/locations.properties` | Пути к рабочим каталогам и данным. |
-| `config/logging.properties` | Уровни и настройки журналирования. |
+| `SchemaAnalyst/build.gradle` | Gradle-сборка SchemaAnalyst; подключает Java-обвязки из `test_suite_minimization/src/main/java`. |
+| `SchemaAnalyst/build.xml` | Сборка Ant, используемая некоторыми исходными сценариями. |
+| `SchemaAnalyst/settings.gradle` | Имя и настройки Gradle-проекта. |
+| `SchemaAnalyst/gradlew`, `SchemaAnalyst/gradlew.bat` | Unix- и Windows-обёртки Gradle. |
+| `SchemaAnalyst/gradle/wrapper/gradle-wrapper.jar` | Исполняемая часть Gradle Wrapper. |
+| `SchemaAnalyst/gradle/wrapper/gradle-wrapper.properties` | Версия Gradle и параметры загрузки Wrapper. |
+| `SchemaAnalyst/SampleReductionExperimentRunner.sh` | Запускает серию экспериментов по сокращению. |
+| `SchemaAnalyst/run-analysepipeline.sh` | Запуск анализа схем через pipeline. |
+| `SchemaAnalyst/run-mutant-timing.sh` | Замер времени анализа мутантов. |
+| `SchemaAnalyst/run-options-random.sh` | Эксперименты с параметрами и случайным выбором. |
+| `SchemaAnalyst/run-options-random-fullreduce.sh` | Вариант эксперимента с полным сокращением. |
+| `SchemaAnalyst/run-virtual.sh` | Запуск виртуального анализа мутантов. |
+| `SchemaAnalyst/run-virtual-timing.sh` | Вариант виртуального анализа с замером времени. |
+| `SchemaAnalyst/schemaanalyst-logo-gh.png` | Изображение SchemaAnalyst. |
+| `SchemaAnalyst/ukwac_char_lm` | Языковая модель, используемая компонентом `LangModel` генерации данных. |
 
-В `lib` находятся `JavaRunner.jar`, `ant-launcher.jar`, `ant-sources.jar`,
-`ant.jar` и `jacocoant.jar`. В `scripts` лежат:
-
-| Файл | Назначение |
-|---|---|
-| `scripts/analysecoverage.sh` | Запуск анализа покрытия. |
-| `scripts/analysepipeline.sh` | Запуск анализа через pipeline. |
-| `scripts/build_coursework_docx.ps1` | Сборка Word-материала курсовой. |
-| `scripts/checks/checks.sql` | SQL-определения проверок для экспериментов. |
-| `scripts/checks/functions.sql` | SQL-функции для проверок. |
-| `scripts/checks/inserts.sql` | Тестовые SQL-вставки для проверок. |
-| `scripts/coverageexperiment.sh` | Серия экспериментов по покрытию. |
-| `scripts/experiment.sh` | Общая оболочка экспериментального запуска. |
-| `scripts/find_alive.R` | R-скрипт обработки результатов и поиска выживших мутантов. |
-| `scripts/generatorexperiment.sh` | Эксперименты с генераторами тестовых данных. |
-| `scripts/interactorexperiment.sh` | Эксперименты компонента interaction. |
-| `scripts/issta-scripts.zip` | Архив скриптов для соответствующих экспериментальных запусков. |
-| `scripts/livemutantexperiment.sh` | Эксперименты с live-мутантами. |
-| `scripts/operatorexperiment.sh` | Эксперименты с операторами мутаций. |
-| `scripts/pipelineexperiment.sh` | Эксперименты с вариантами pipeline. |
-| `scripts/runExperiments.py` | Python-драйвер пакетного запуска экспериментов. |
-| `scripts/runMutation.py` | Python-драйвер запуска mutation analysis. |
-| `scripts/techniqueexperiment.sh` | Сравнение техник генерации/анализа. |
-| `scripts/threadexperiment.sh` | Эксперименты с потоками. |
-| `scripts/updateproperties.sh` | Обновление свойств конфигурации перед запуском. |
-
-## test_suite_minimization — практическая часть
-
-Практическая часть проверяет, какие требования и граничные случаи остаются
-после сокращения набора. Каждый штатный редуктор получает независимую копию
-одного и того же исходного снимка. Отдельно проверяются сравнения `x op c` и
-`x op y`, а фактическое поведение SQL сверяется с PostgreSQL.
-
-### Java-обвязка экспериментов
+### Конфигурация и библиотеки
 
 | Файл | Назначение |
 |---|---|
-| `src/main/java/org/schemaanalyst/minimization/BaselineSnapshot.java` | Сериализуемый снимок схемы, набора тестов, требований и параметров генерации. |
-| `src/main/java/org/schemaanalyst/minimization/CourseworkSchema.java` | Небольшая схема с CHECK, ключами и ограничениями для воспроизводимого эксперимента. |
-| `src/main/java/org/schemaanalyst/minimization/GenerateBaselineSnapshot.java` | Однократная генерация и сохранение исходного набора в `.ser`. |
-| `src/main/java/org/schemaanalyst/minimization/ExportBaselineJson.java` | Экспорт сохранённого снимка в JSON для C++ и PostgreSQL-валидатора. |
-| `src/main/java/org/schemaanalyst/minimization/SnapshotJsonExporter.java` | Формирование JSON со схемой, требованиями, тестами, INSERT и данными генерации. |
-| `src/main/java/org/schemaanalyst/minimization/RunSnapshotReducer.java` | Повторное чтение одного снимка и независимый запуск выбранного штатного редуктора. |
-| `src/main/java/org/schemaanalyst/minimization/JsonUtil.java` | Запись JSON без дополнительной Java-зависимости. |
-| `src/main/java/org/schemaanalyst/testgeneration/coveragecriterion/integrityconstraint/CondAICC.java` | Реализация критерия покрытия, используемого в экспериментах. |
+| `SchemaAnalyst/config/capture.properties` | Настройки захвата экспериментальных данных. |
+| `SchemaAnalyst/config/database.properties` | Параметры подключения к СУБД. |
+| `SchemaAnalyst/config/experiment.properties` | Настройки экспериментальных запусков. |
+| `SchemaAnalyst/config/locations.properties` | Пути к рабочим каталогам и данным. |
+| `SchemaAnalyst/config/logging.properties` | Настройки журналирования. |
 
-### C++ редуктор (`cpp`)
+В `SchemaAnalyst/lib` находятся `JavaRunner.jar`, `ant-launcher.jar`,
+`ant-sources.jar`, `ant.jar` и `jacocoant.jar`.
 
-| Файл | Назначение |
-|---|---|
-| `cpp/CMakeLists.txt` | Настройка CMake-сборки и регистрации тестов CTest. |
-| `cpp/README.md` | Краткое описание алгоритма, формата входа и команд сборки C++-части. |
-| `cpp/include/minimizer/boundary.hpp` | Типы и интерфейс построения покрытия требований и границ. |
-| `cpp/include/minimizer/json.hpp` | Интерфейс чтения и записи JSON. |
-| `cpp/include/minimizer/minimizer.hpp` | Интерфейс минимизации тестового набора. |
-| `cpp/include/minimizer/model.hpp` | Типы входных данных: схема, CHECK, требования и тесты. |
-| `cpp/src/boundary.cpp` | Расчёт покрытия требований и проверяемых границ. |
-| `cpp/src/json.cpp` | Парсинг и сериализация JSON. |
-| `cpp/src/main.cpp` | Командная точка входа C++-программы. |
-| `cpp/src/minimizer.cpp` | Детерминированный выбор поднабора тестов. |
-| `cpp/src/model.cpp` | Разбор модели входных данных и PostgreSQL evidence. |
-| `cpp/tests/test_minimizer.cpp` | C++ unit/regression-тесты редуктора. |
-
-### Эксперименты и PostgreSQL (`experiments`)
+### Сценарии в `SchemaAnalyst/scripts`
 
 | Файл | Назначение |
 |---|---|
-| `experiments/README.md` | Протокол генерации исходного снимка и независимого запуска редукторов. |
-| `experiments/FORMAT.md` | Формат JSON-обмена между Java и C++, включая PostgreSQL evidence. |
-| `experiments/LAUNCH_STATUS.md` | Журнал первоначальной диагностики запуска Java-эксперимента. |
-| `experiments/schema.sql` | SQL-схема, используемая проверочными сценариями. |
-| `experiments/manual_null_oracle.sql` | Ручная проверка поведения CHECK при NULL. |
-| `experiments/run_cpp_checks.ps1` | Сборка и тестирование C++-редуктора из PowerShell. |
-| `experiments/run_matrix.ps1` | Запуск матрицы генераторов и редукторов на независимых снимках. |
-| `experiments/validate_postgres.ps1` | Выполнение тестов в PostgreSQL и сохранение фактических результатов/SQLSTATE. |
-| `experiments/fixtures/basic.json` | Минимальная JSON-фикстура для проверки формата и C++-обработки. |
-| `experiments/fixtures/postgres-boundaries.json` | Фикстура с проверками граничных сравнений и PostgreSQL evidence. |
+| `analysecoverage.sh` | Запуск анализа покрытия. |
+| `analysepipeline.sh` | Запуск анализа через pipeline. |
+| `checks/checks.sql` | SQL-определения проверок для экспериментов. |
+| `checks/functions.sql` | SQL-функции для проверок. |
+| `checks/inserts.sql` | Тестовые SQL-вставки для проверок. |
+| `coverageexperiment.sh` | Серия экспериментов по покрытию. |
+| `experiment.sh` | Общая оболочка экспериментального запуска. |
+| `find_alive.R` | Обработка результатов и поиск выживших мутантов. |
+| `generatorexperiment.sh` | Эксперименты с генераторами тестовых данных. |
+| `interactorexperiment.sh` | Эксперименты компонента interaction. |
+| `issta-scripts.zip` | Архив экспериментальных скриптов. |
+| `livemutantexperiment.sh` | Эксперименты с live-мутантами. |
+| `operatorexperiment.sh` | Эксперименты с операторами мутаций. |
+| `pipelineexperiment.sh` | Эксперименты с вариантами pipeline. |
+| `runExperiments.py` | Python-драйвер пакетного запуска экспериментов. |
+| `runMutation.py` | Python-драйвер mutation analysis. |
+| `techniqueexperiment.sh` | Сравнение техник генерации и анализа. |
+| `threadexperiment.sh` | Эксперименты с потоками. |
+| `updateproperties.sh` | Обновление конфигурационных свойств. |
 
-### Документы и результаты
+## `test_suite_minimization/`
+
+Практическая часть сравнивает штатные редукторы и проверяет отдельное
+сохранение требований SchemaAnalyst и наблюдаемых границ для сравнений `x op c`
+и `x op y`. Каждый редуктор получает независимую копию исходного набора.
+
+### Java-обвязка (`test_suite_minimization/src`)
 
 | Файл | Назначение |
 |---|---|
-| `docs/BUILD_AND_TESTS.md` | Подробная инструкция по сборке, тестам, CTest, PostgreSQL и матрице экспериментов. |
-| `docs/IMPLEMENTATION_STATUS.md` | Реализованные компоненты, проверенные запуски и ограничения текущей версии. |
-| `docs/PRACTICAL_CHAPTER.md` | Текст практической главы курсовой работы. |
-| `docs/Coursework_PostgreSQL_Practical.docx` | Word-материал практической части по PostgreSQL. |
-| `RESULTS_BASELINE.md` | Числа тестов и INSERT, время, покрытие, потерянные границы и фактические ответы PostgreSQL. |
-| `старое описание.md` | Точная копия README, который находился здесь до замены на это русскоязычное описание. |
+| `BaselineSnapshot.java` | Сериализуемый снимок схемы, набора тестов, требований и параметров генерации. |
+| `CourseworkSchema.java` | Схема для эксперимента с CHECK, ключами и другими ограничениями. |
+| `GenerateBaselineSnapshot.java` | Однократная генерация и сохранение исходного набора в `.ser`. |
+| `ExportBaselineJson.java` | Экспорт сохранённого снимка в JSON. |
+| `SnapshotJsonExporter.java` | Формирование JSON со схемой, требованиями, тестами и SQL. |
+| `RunSnapshotReducer.java` | Независимый запуск выбранного штатного редуктора на снимке. |
+| `JsonUtil.java` | Запись JSON без дополнительной Java-зависимости. |
 
-Сырые файлы запусков (`.ser`, CSV, JSON-отчёты и логи) создаются в
-`experiments/results/`. Этот каталог игнорируется Git; основные подтверждённые
-результаты сохранены в `RESULTS_BASELINE.md`.
+Сборка Gradle проекта SchemaAnalyst подключает эти исходники; отдельная копия
+Java-зависимостей не создаётся.
 
-## Сборка и тестирование
+### C++ редуктор (`test_suite_minimization/cpp`)
 
-Подробные команды и требования к среде приведены в
-[руководстве по сборке и тестам](./docs/BUILD_AND_TESTS.md). Кратко:
+| Файл | Назначение |
+|---|---|
+| `CMakeLists.txt` | Настройка CMake и регистрация тестов CTest. |
+| `README.md` | Описание алгоритма, формата входа и команд сборки C++-части. |
+| `include/minimizer/boundary.hpp` | Интерфейс расчёта покрытия требований и границ. |
+| `include/minimizer/json.hpp` | Интерфейс чтения и записи JSON. |
+| `include/minimizer/minimizer.hpp` | Интерфейс минимизации тестового набора. |
+| `include/minimizer/model.hpp` | Модель схемы, CHECK, требований и тестов. |
+| `src/boundary.cpp` | Расчёт покрытия требований и подтверждённых границ. |
+| `src/json.cpp` | Парсинг и сериализация JSON. |
+| `src/main.cpp` | Точка входа C++-программы. |
+| `src/minimizer.cpp` | Детерминированный выбор поднабора тестов. |
+| `src/model.cpp` | Разбор входной модели и PostgreSQL evidence. |
+| `tests/test_minimizer.cpp` | Unit- и regression-тесты редуктора. |
+
+### Эксперименты (`test_suite_minimization/experiments`)
+
+| Файл | Назначение |
+|---|---|
+| `README.md` | Протокол генерации снимка и независимого запуска редукторов. |
+| `FORMAT.md` | Формат JSON-обмена между Java, C++ и PostgreSQL-валидатором. |
+| `LAUNCH_STATUS.md` | Журнал первоначальной диагностики запуска Java-эксперимента. |
+| `schema.sql` | SQL-схема для проверочных сценариев. |
+| `manual_null_oracle.sql` | Проверка семантики CHECK при NULL. |
+| `run_cpp_checks.ps1` | Сборка и тестирование C++-редуктора из PowerShell. |
+| `run_matrix.ps1` | Запуск матрицы генераторов и редукторов на независимых снимках. |
+| `validate_postgres.ps1` | Выполнение тестов в PostgreSQL и сохранение результата, SQLSTATE и ограничения. |
+| `fixtures/basic.json` | Минимальная фикстура JSON для C++-проверки. |
+| `fixtures/postgres-boundaries.json` | Фикстура с граничными сравнениями и PostgreSQL evidence. |
+
+`test_suite_minimization/scripts/build_coursework_docx.ps1` собирает Word-материал
+курсовой работы.
+
+## `docs/`
+
+| Файл | Назначение |
+|---|---|
+| `BUILD_AND_TESTS.md` | Команды сборки, расположение тестов, PostgreSQL и запуск матрицы. |
+| `IMPLEMENTATION_STATUS.md` | Реализованные компоненты, результаты запусков и ограничения. |
+| `PRACTICAL_CHAPTER.md` | Текст практической главы курсовой. |
+| `Coursework_PostgreSQL_Practical.docx` | Word-материал практической части. |
+| `RESULTS_BASELINE.md` | Метрики, покрытие, потерянные границы и фактические ответы PostgreSQL. |
+| `старое описание.md` | Точная копия README, сохранённая перед обновлением описания проекта. |
+
+Сырые `.ser`, CSV, JSON-отчёты и логи создаются под
+`test_suite_minimization/experiments/results/` и не добавляются в Git.
+
+## Сборка и тесты
+
+Все команды выполняются из корня репозитория. Java-обвязки компилируются вместе
+с SchemaAnalyst:
 
 ```powershell
-.\gradlew.bat compile --offline --no-daemon
-.\gradlew.bat test --offline --no-daemon
+.\SchemaAnalyst\gradlew.bat -p .\SchemaAnalyst compile --offline --no-daemon
+.\SchemaAnalyst\gradlew.bat -p .\SchemaAnalyst test --offline --no-daemon
 ```
 
-Для C++ потребуются CMake, Ninja и компилятор C++17; команды находятся в
-руководстве выше. Для полной экспериментальной матрицы также нужен локальный
-PostgreSQL. Результаты всех выполненных базовых прогонов и известные ошибки
-полного Java test suite перечислены в [RESULTS_BASELINE.md](./RESULTS_BASELINE.md).
+C++ редуктор и зарегистрированный CTest можно собрать и проверить скриптом:
+
+```powershell
+.\test_suite_minimization\experiments\run_cpp_checks.ps1
+```
+
+Для полной матрицы нужен локальный PostgreSQL и установленный JDK. Подробные
+инструкции и известные ограничения приведены в
+[руководстве по сборке и тестам](./docs/BUILD_AND_TESTS.md). Результаты базовых
+прогонов находятся в [RESULTS_BASELINE.md](./docs/RESULTS_BASELINE.md).
 
 ## Лицензия
 
