@@ -1,0 +1,11 @@
+java: openjdk version "1.8.0_512" OpenJDK Runtime Environment (Temurin)(build 1.8.0_512-b09) OpenJDK 64-Bit Server VM (Temurin)(build 25.512-b09, mixed mode)
+javac: javac 1.8.0_512
+g++: g++.exe (Rev3, Built by MSYS2 project) 16.2.0 Copyright (C) 2026 Free Software Foundation, Inc. This is free software; see the source for copying conditions.  There is NO warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. 
+psql: psql (PostgreSQL) 18.7
+cmake: cmake version 4.4.3  CMake suite maintained and supported by Kitware (kitware.com/cmake).
+java_home=C:\Users\Dashyla\Desktop\computer_security\8_semester\Courswork\schemaanalyst_experiments\runtime\jdk8u512-b09
+dependency_build=C:\Users\Dashyla\Desktop\computer_security\8_semester\Courswork\test_suite_minimization
+powershell=5.1.26100.9818
+postgres_host=127.0.0.1
+postgres_port=55432
+postgres_database=coursework_validation

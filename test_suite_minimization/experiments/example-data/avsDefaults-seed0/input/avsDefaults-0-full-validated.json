@@ -1,0 +1,1504 @@
+{
+    "formatVersion":  1,
+    "snapshotSha256":  "dfa813b78e7a0ddc98d0e24220f2abbc8aa74f77d443cff69b69a074a7cbacb5",
+    "generation":  {
+                       "criterion":  "CondAICC",
+                       "generator":  "avsDefaults",
+                       "seed":  0,
+                       "budget":  10000,
+                       "generationNanoseconds":  144665400,
+                       "attemptedRequirements":  24,
+                       "coveredRequirements":  24
+                   },
+    "schema":  {
+                   "name":  "CourseworkSchema",
+                   "tables":  [
+                                  {
+                                      "name":  "parent",
+                                      "columns":  [
+                                                      {
+                                                          "name":  "id",
+                                                          "type":  "IntDataType"
+                                                      }
+                                                  ]
+                                  },
+                                  {
+                                      "name":  "sample",
+                                      "columns":  [
+                                                      {
+                                                          "name":  "id",
+                                                          "type":  "IntDataType"
+                                                      },
+                                                      {
+                                                          "name":  "parent_id",
+                                                          "type":  "IntDataType"
+                                                      },
+                                                      {
+                                                          "name":  "code",
+                                                          "type":  "IntDataType"
+                                                      },
+                                                      {
+                                                          "name":  "amount",
+                                                          "type":  "IntDataType"
+                                                      },
+                                                      {
+                                                          "name":  "ceiling",
+                                                          "type":  "IntDataType"
+                                                      },
+                                                      {
+                                                          "name":  "floor",
+                                                          "type":  "IntDataType"
+                                                      }
+                                                  ]
+                                  }
+                              ],
+                   "checks":  [
+                                  {
+                                      "id":  "amount_min",
+                                      "table":  "sample",
+                                      "expression":  "amount \u003e= 10",
+                                      "supported":  true,
+                                      "operator":  "\u003e=",
+                                      "left":  {
+                                                   "kind":  "column",
+                                                   "table":  "sample",
+                                                   "column":  "amount",
+                                                   "type":  "IntDataType"
+                                               },
+                                      "right":  {
+                                                    "kind":  "constant",
+                                                    "value":  "10",
+                                                    "type":  "NumericValue"
+                                                }
+                                  },
+                                  {
+                                      "id":  "amount_ceiling",
+                                      "table":  "sample",
+                                      "expression":  "amount \u003c= ceiling",
+                                      "supported":  true,
+                                      "operator":  "\u003c=",
+                                      "left":  {
+                                                   "kind":  "column",
+                                                   "table":  "sample",
+                                                   "column":  "amount",
+                                                   "type":  "IntDataType"
+                                               },
+                                      "right":  {
+                                                    "kind":  "column",
+                                                    "table":  "sample",
+                                                    "column":  "ceiling",
+                                                    "type":  "IntDataType"
+                                                }
+                                  },
+                                  {
+                                      "id":  "ceiling_max",
+                                      "table":  "sample",
+                                      "expression":  "ceiling \u003c 100",
+                                      "supported":  true,
+                                      "operator":  "\u003c",
+                                      "left":  {
+                                                   "kind":  "column",
+                                                   "table":  "sample",
+                                                   "column":  "ceiling",
+                                                   "type":  "IntDataType"
+                                               },
+                                      "right":  {
+                                                    "kind":  "constant",
+                                                    "value":  "100",
+                                                    "type":  "NumericValue"
+                                                }
+                                  },
+                                  {
+                                      "id":  "floor_min",
+                                      "table":  "sample",
+                                      "expression":  "floor \u003e 0",
+                                      "supported":  true,
+                                      "operator":  "\u003e",
+                                      "left":  {
+                                                   "kind":  "column",
+                                                   "table":  "sample",
+                                                   "column":  "floor",
+                                                   "type":  "IntDataType"
+                                               },
+                                      "right":  {
+                                                    "kind":  "constant",
+                                                    "value":  "0",
+                                                    "type":  "NumericValue"
+                                                }
+                                  }
+                              ]
+               },
+    "requirements":  [
+                         {
+                             "id":  "R1",
+                             "expectedResult":  true,
+                             "requiresComparisonRow":  true,
+                             "predicate":  "((Match[≠[parent: id]] ∧ ¬Null[parent: id]))",
+                             "failedDuringGeneration":  false,
+                             "descriptors":  [
+                                                 "1-parent: PRIMARY KEY[id] for parent is CC=T"
+                                             ]
+                         },
+                         {
+                             "id":  "R2",
+                             "expectedResult":  false,
+                             "requiresComparisonRow":  true,
+                             "predicate":  "((Null[parent: id]))",
+                             "failedDuringGeneration":  false,
+                             "descriptors":  [
+                                                 "2-parent: PRIMARY KEY[id] for parent is NC=T"
+                                             ]
+                         },
+                         {
+                             "id":  "R3",
+                             "expectedResult":  false,
+                             "requiresComparisonRow":  true,
+                             "predicate":  "((Match[=[parent: id]] ∧ ¬Null[parent: id]))",
+                             "failedDuringGeneration":  false,
+                             "descriptors":  [
+                                                 "3-parent: PRIMARY KEY[id] for parent is CC=F"
+                                             ]
+                         },
+                         {
+                             "id":  "R4",
+                             "expectedResult":  true,
+                             "requiresComparisonRow":  true,
+                             "predicate":  "(¬Null[sample: amount] ∧ (Match[≠[sample: code]] ∨ Null[sample: code]) ∧ (Match[=[sample: parent_id -\u003e parent: id]] ∨ Null[sample: parent_id]) ∧ (Exp[sample: amount \u003e= 10] ∨ Null[sample: amount]) ∧ (Exp[sample: amount \u003c= ceiling] ∨ Null[sample: amount] ∨ Null[sample: ceiling]) ∧ (Exp[sample: ceiling \u003c 100] ∨ Null[sample: ceiling]) ∧ (Exp[sample: floor \u003e 0] ∨ Null[sample: floor]) ∧ (Match[≠[sample: id]] ∧ ¬Null[sample: id]))",
+                             "failedDuringGeneration":  false,
+                             "descriptors":  [
+                                                 "1-sample: PRIMARY KEY[id] for sample is CC=T",
+                                                 "4-sample: NOT NULL(amount) for sample is CC=T"
+                                             ]
+                         },
+                         {
+                             "id":  "R5",
+                             "expectedResult":  false,
+                             "requiresComparisonRow":  true,
+                             "predicate":  "(¬Null[sample: amount] ∧ (Match[≠[sample: code]] ∨ Null[sample: code]) ∧ (Match[=[sample: parent_id -\u003e parent: id]] ∨ Null[sample: parent_id]) ∧ (Exp[sample: amount \u003e= 10] ∨ Null[sample: amount]) ∧ (Exp[sample: amount \u003c= ceiling] ∨ Null[sample: amount] ∨ Null[sample: ceiling]) ∧ (Exp[sample: ceiling \u003c 100] ∨ Null[sample: ceiling]) ∧ (Exp[sample: floor \u003e 0] ∨ Null[sample: floor]) ∧ (Null[sample: id]))",
+                             "failedDuringGeneration":  false,
+                             "descriptors":  [
+                                                 "2-sample: PRIMARY KEY[id] for sample is NC=T"
+                                             ]
+                         },
+                         {
+                             "id":  "R6",
+                             "expectedResult":  false,
+                             "requiresComparisonRow":  true,
+                             "predicate":  "(¬Null[sample: amount] ∧ (Match[≠[sample: code]] ∨ Null[sample: code]) ∧ (Match[=[sample: parent_id -\u003e parent: id]] ∨ Null[sample: parent_id]) ∧ (Exp[sample: amount \u003e= 10] ∨ Null[sample: amount]) ∧ (Exp[sample: amount \u003c= ceiling] ∨ Null[sample: amount] ∨ Null[sample: ceiling]) ∧ (Exp[sample: ceiling \u003c 100] ∨ Null[sample: ceiling]) ∧ (Exp[sample: floor \u003e 0] ∨ Null[sample: floor]) ∧ (Match[=[sample: id]] ∧ ¬Null[sample: id]))",
+                             "failedDuringGeneration":  false,
+                             "descriptors":  [
+                                                 "3-sample: PRIMARY KEY[id] for sample is CC=F"
+                                             ]
+                         },
+                         {
+                             "id":  "R7",
+                             "expectedResult":  false,
+                             "requiresComparisonRow":  false,
+                             "predicate":  "((Match[≠[sample: id]] ∧ ¬Null[sample: id]) ∧ (Match[≠[sample: code]] ∨ Null[sample: code]) ∧ (Match[=[sample: parent_id -\u003e parent: id]] ∨ Null[sample: parent_id]) ∧ (Exp[sample: amount \u003e= 10] ∨ Null[sample: amount]) ∧ (Exp[sample: amount \u003c= ceiling] ∨ Null[sample: amount] ∨ Null[sample: ceiling]) ∧ (Exp[sample: ceiling \u003c 100] ∨ Null[sample: ceiling]) ∧ (Exp[sample: floor \u003e 0] ∨ Null[sample: floor]) ∧ Null[sample: amount])",
+                             "failedDuringGeneration":  false,
+                             "descriptors":  [
+                                                 "5-sample: NOT NULL(amount) for sample is CC=F"
+                                             ]
+                         },
+                         {
+                             "id":  "R8",
+                             "expectedResult":  true,
+                             "requiresComparisonRow":  true,
+                             "predicate":  "((Match[≠[sample: id]] ∧ ¬Null[sample: id]) ∧ ¬Null[sample: amount] ∧ (Match[=[sample: parent_id -\u003e parent: id]] ∨ Null[sample: parent_id]) ∧ (Exp[sample: amount \u003e= 10] ∨ Null[sample: amount]) ∧ (Exp[sample: amount \u003c= ceiling] ∨ Null[sample: amount] ∨ Null[sample: ceiling]) ∧ (Exp[sample: ceiling \u003c 100] ∨ Null[sample: ceiling]) ∧ (Exp[sample: floor \u003e 0] ∨ Null[sample: floor]) ∧ (Null[sample: code]))",
+                             "failedDuringGeneration":  false,
+                             "descriptors":  [
+                                                 "6-sample: UNIQUE[code] for sample is NC=T"
+                                             ]
+                         },
+                         {
+                             "id":  "R9",
+                             "expectedResult":  true,
+                             "requiresComparisonRow":  true,
+                             "predicate":  "((Match[≠[sample: id]] ∧ ¬Null[sample: id]) ∧ ¬Null[sample: amount] ∧ (Match[=[sample: parent_id -\u003e parent: id]] ∨ Null[sample: parent_id]) ∧ (Exp[sample: amount \u003e= 10] ∨ Null[sample: amount]) ∧ (Exp[sample: amount \u003c= ceiling] ∨ Null[sample: amount] ∨ Null[sample: ceiling]) ∧ (Exp[sample: ceiling \u003c 100] ∨ Null[sample: ceiling]) ∧ (Exp[sample: floor \u003e 0] ∨ Null[sample: floor]) ∧ (Match[≠[sample: code]] ∧ ¬Null[sample: code]))",
+                             "failedDuringGeneration":  false,
+                             "descriptors":  [
+                                                 "7-sample: UNIQUE[code] for sample is CC=T"
+                                             ]
+                         },
+                         {
+                             "id":  "R10",
+                             "expectedResult":  false,
+                             "requiresComparisonRow":  true,
+                             "predicate":  "((Match[≠[sample: id]] ∧ ¬Null[sample: id]) ∧ ¬Null[sample: amount] ∧ (Match[=[sample: parent_id -\u003e parent: id]] ∨ Null[sample: parent_id]) ∧ (Exp[sample: amount \u003e= 10] ∨ Null[sample: amount]) ∧ (Exp[sample: amount \u003c= ceiling] ∨ Null[sample: amount] ∨ Null[sample: ceiling]) ∧ (Exp[sample: ceiling \u003c 100] ∨ Null[sample: ceiling]) ∧ (Exp[sample: floor \u003e 0] ∨ Null[sample: floor]) ∧ (Match[=[sample: code]] ∧ ¬Null[sample: code]))",
+                             "failedDuringGeneration":  false,
+                             "descriptors":  [
+                                                 "8-sample: UNIQUE[code] for sample is CC=F"
+                                             ]
+                         },
+                         {
+                             "id":  "R11",
+                             "expectedResult":  true,
+                             "requiresComparisonRow":  false,
+                             "predicate":  "((Match[≠[sample: id]] ∧ ¬Null[sample: id]) ∧ ¬Null[sample: amount] ∧ (Match[≠[sample: code]] ∨ Null[sample: code]) ∧ (Exp[sample: amount \u003e= 10] ∨ Null[sample: amount]) ∧ (Exp[sample: amount \u003c= ceiling] ∨ Null[sample: amount] ∨ Null[sample: ceiling]) ∧ (Exp[sample: ceiling \u003c 100] ∨ Null[sample: ceiling]) ∧ (Exp[sample: floor \u003e 0] ∨ Null[sample: floor]) ∧ (Null[sample: parent_id]))",
+                             "failedDuringGeneration":  false,
+                             "descriptors":  [
+                                                 "9-sample: FOREIGN KEY[parent_id] for sample is NC=T"
+                                             ]
+                         },
+                         {
+                             "id":  "R12",
+                             "expectedResult":  true,
+                             "requiresComparisonRow":  false,
+                             "predicate":  "((Match[≠[sample: id]] ∧ ¬Null[sample: id]) ∧ ¬Null[sample: amount] ∧ (Match[≠[sample: code]] ∨ Null[sample: code]) ∧ (Exp[sample: amount \u003e= 10] ∨ Null[sample: amount]) ∧ (Exp[sample: amount \u003c= ceiling] ∨ Null[sample: amount] ∨ Null[sample: ceiling]) ∧ (Exp[sample: ceiling \u003c 100] ∨ Null[sample: ceiling]) ∧ (Exp[sample: floor \u003e 0] ∨ Null[sample: floor]) ∧ (Match[=[sample: parent_id -\u003e parent: id]] ∧ ¬Null[sample: parent_id]))",
+                             "failedDuringGeneration":  false,
+                             "descriptors":  [
+                                                 "10-sample: FOREIGN KEY[parent_id] for sample is CC=T"
+                                             ]
+                         },
+                         {
+                             "id":  "R13",
+                             "expectedResult":  false,
+                             "requiresComparisonRow":  false,
+                             "predicate":  "((Match[≠[sample: id]] ∧ ¬Null[sample: id]) ∧ ¬Null[sample: amount] ∧ (Match[≠[sample: code]] ∨ Null[sample: code]) ∧ (Exp[sample: amount \u003e= 10] ∨ Null[sample: amount]) ∧ (Exp[sample: amount \u003c= ceiling] ∨ Null[sample: amount] ∨ Null[sample: ceiling]) ∧ (Exp[sample: ceiling \u003c 100] ∨ Null[sample: ceiling]) ∧ (Exp[sample: floor \u003e 0] ∨ Null[sample: floor]) ∧ (Match[≠[sample: parent_id -\u003e parent: id]] ∧ ¬Null[sample: parent_id]))",
+                             "failedDuringGeneration":  false,
+                             "descriptors":  [
+                                                 "11-sample: FOREIGN KEY[parent_id] for sample is CC=F"
+                                             ]
+                         },
+                         {
+                             "id":  "R14",
+                             "expectedResult":  true,
+                             "requiresComparisonRow":  false,
+                             "predicate":  "((Match[≠[sample: id]] ∧ ¬Null[sample: id]) ∧ ¬Null[sample: amount] ∧ (Match[≠[sample: code]] ∨ Null[sample: code]) ∧ (Match[=[sample: parent_id -\u003e parent: id]] ∨ Null[sample: parent_id]) ∧ (Exp[sample: amount \u003c= ceiling] ∨ Null[sample: amount] ∨ Null[sample: ceiling]) ∧ (Exp[sample: ceiling \u003c 100] ∨ Null[sample: ceiling]) ∧ (Exp[sample: floor \u003e 0] ∨ Null[sample: floor]) ∧ (Exp[sample: amount \u003e= 10] ∧ ¬Null[sample: amount]))",
+                             "failedDuringGeneration":  false,
+                             "descriptors":  [
+                                                 "13-sample: CHECK[amount \u003e= 10] for sample is CC=T"
+                                             ]
+                         },
+                         {
+                             "id":  "R15",
+                             "expectedResult":  false,
+                             "requiresComparisonRow":  false,
+                             "predicate":  "((Match[≠[sample: id]] ∧ ¬Null[sample: id]) ∧ ¬Null[sample: amount] ∧ (Match[≠[sample: code]] ∨ Null[sample: code]) ∧ (Match[=[sample: parent_id -\u003e parent: id]] ∨ Null[sample: parent_id]) ∧ (Exp[sample: amount \u003c= ceiling] ∨ Null[sample: amount] ∨ Null[sample: ceiling]) ∧ (Exp[sample: ceiling \u003c 100] ∨ Null[sample: ceiling]) ∧ (Exp[sample: floor \u003e 0] ∨ Null[sample: floor]) ∧ (¬Exp[sample: amount \u003e= 10] ∧ ¬Null[sample: amount]))",
+                             "failedDuringGeneration":  false,
+                             "descriptors":  [
+                                                 "14-sample: CHECK[amount \u003e= 10] for sample is CC=F"
+                                             ]
+                         },
+                         {
+                             "id":  "R16",
+                             "expectedResult":  true,
+                             "requiresComparisonRow":  false,
+                             "predicate":  "((Match[≠[sample: id]] ∧ ¬Null[sample: id]) ∧ ¬Null[sample: amount] ∧ (Match[≠[sample: code]] ∨ Null[sample: code]) ∧ (Match[=[sample: parent_id -\u003e parent: id]] ∨ Null[sample: parent_id]) ∧ (Exp[sample: amount \u003e= 10] ∨ Null[sample: amount]) ∧ (Exp[sample: ceiling \u003c 100] ∨ Null[sample: ceiling]) ∧ (Exp[sample: floor \u003e 0] ∨ Null[sample: floor]) ∧ (Null[sample: amount] ∨ Null[sample: ceiling]))",
+                             "failedDuringGeneration":  false,
+                             "descriptors":  [
+                                                 "15-sample: CHECK[amount \u003c= ceiling] for sample is NC=T"
+                                             ]
+                         },
+                         {
+                             "id":  "R17",
+                             "expectedResult":  true,
+                             "requiresComparisonRow":  false,
+                             "predicate":  "((Match[≠[sample: id]] ∧ ¬Null[sample: id]) ∧ ¬Null[sample: amount] ∧ (Match[≠[sample: code]] ∨ Null[sample: code]) ∧ (Match[=[sample: parent_id -\u003e parent: id]] ∨ Null[sample: parent_id]) ∧ (Exp[sample: amount \u003e= 10] ∨ Null[sample: amount]) ∧ (Exp[sample: ceiling \u003c 100] ∨ Null[sample: ceiling]) ∧ (Exp[sample: floor \u003e 0] ∨ Null[sample: floor]) ∧ (Exp[sample: amount \u003c= ceiling] ∧ ¬Null[sample: amount] ∧ ¬Null[sample: ceiling]))",
+                             "failedDuringGeneration":  false,
+                             "descriptors":  [
+                                                 "16-sample: CHECK[amount \u003c= ceiling] for sample is CC=T"
+                                             ]
+                         },
+                         {
+                             "id":  "R18",
+                             "expectedResult":  false,
+                             "requiresComparisonRow":  false,
+                             "predicate":  "((Match[≠[sample: id]] ∧ ¬Null[sample: id]) ∧ ¬Null[sample: amount] ∧ (Match[≠[sample: code]] ∨ Null[sample: code]) ∧ (Match[=[sample: parent_id -\u003e parent: id]] ∨ Null[sample: parent_id]) ∧ (Exp[sample: amount \u003e= 10] ∨ Null[sample: amount]) ∧ (Exp[sample: ceiling \u003c 100] ∨ Null[sample: ceiling]) ∧ (Exp[sample: floor \u003e 0] ∨ Null[sample: floor]) ∧ (¬Exp[sample: amount \u003c= ceiling] ∧ ¬Null[sample: amount] ∧ ¬Null[sample: ceiling]))",
+                             "failedDuringGeneration":  false,
+                             "descriptors":  [
+                                                 "17-sample: CHECK[amount \u003c= ceiling] for sample is CC=F"
+                                             ]
+                         },
+                         {
+                             "id":  "R19",
+                             "expectedResult":  true,
+                             "requiresComparisonRow":  false,
+                             "predicate":  "((Match[≠[sample: id]] ∧ ¬Null[sample: id]) ∧ ¬Null[sample: amount] ∧ (Match[≠[sample: code]] ∨ Null[sample: code]) ∧ (Match[=[sample: parent_id -\u003e parent: id]] ∨ Null[sample: parent_id]) ∧ (Exp[sample: amount \u003e= 10] ∨ Null[sample: amount]) ∧ (Exp[sample: amount \u003c= ceiling] ∨ Null[sample: amount] ∨ Null[sample: ceiling]) ∧ (Exp[sample: floor \u003e 0] ∨ Null[sample: floor]) ∧ (Null[sample: ceiling]))",
+                             "failedDuringGeneration":  false,
+                             "descriptors":  [
+                                                 "18-sample: CHECK[ceiling \u003c 100] for sample is NC=T"
+                                             ]
+                         },
+                         {
+                             "id":  "R20",
+                             "expectedResult":  true,
+                             "requiresComparisonRow":  false,
+                             "predicate":  "((Match[≠[sample: id]] ∧ ¬Null[sample: id]) ∧ ¬Null[sample: amount] ∧ (Match[≠[sample: code]] ∨ Null[sample: code]) ∧ (Match[=[sample: parent_id -\u003e parent: id]] ∨ Null[sample: parent_id]) ∧ (Exp[sample: amount \u003e= 10] ∨ Null[sample: amount]) ∧ (Exp[sample: amount \u003c= ceiling] ∨ Null[sample: amount] ∨ Null[sample: ceiling]) ∧ (Exp[sample: floor \u003e 0] ∨ Null[sample: floor]) ∧ (Exp[sample: ceiling \u003c 100] ∧ ¬Null[sample: ceiling]))",
+                             "failedDuringGeneration":  false,
+                             "descriptors":  [
+                                                 "19-sample: CHECK[ceiling \u003c 100] for sample is CC=T"
+                                             ]
+                         },
+                         {
+                             "id":  "R21",
+                             "expectedResult":  false,
+                             "requiresComparisonRow":  false,
+                             "predicate":  "((Match[≠[sample: id]] ∧ ¬Null[sample: id]) ∧ ¬Null[sample: amount] ∧ (Match[≠[sample: code]] ∨ Null[sample: code]) ∧ (Match[=[sample: parent_id -\u003e parent: id]] ∨ Null[sample: parent_id]) ∧ (Exp[sample: amount \u003e= 10] ∨ Null[sample: amount]) ∧ (Exp[sample: amount \u003c= ceiling] ∨ Null[sample: amount] ∨ Null[sample: ceiling]) ∧ (Exp[sample: floor \u003e 0] ∨ Null[sample: floor]) ∧ (¬Exp[sample: ceiling \u003c 100] ∧ ¬Null[sample: ceiling]))",
+                             "failedDuringGeneration":  false,
+                             "descriptors":  [
+                                                 "20-sample: CHECK[ceiling \u003c 100] for sample is CC=F"
+                                             ]
+                         },
+                         {
+                             "id":  "R22",
+                             "expectedResult":  true,
+                             "requiresComparisonRow":  false,
+                             "predicate":  "((Match[≠[sample: id]] ∧ ¬Null[sample: id]) ∧ ¬Null[sample: amount] ∧ (Match[≠[sample: code]] ∨ Null[sample: code]) ∧ (Match[=[sample: parent_id -\u003e parent: id]] ∨ Null[sample: parent_id]) ∧ (Exp[sample: amount \u003e= 10] ∨ Null[sample: amount]) ∧ (Exp[sample: amount \u003c= ceiling] ∨ Null[sample: amount] ∨ Null[sample: ceiling]) ∧ (Exp[sample: ceiling \u003c 100] ∨ Null[sample: ceiling]) ∧ (Null[sample: floor]))",
+                             "failedDuringGeneration":  false,
+                             "descriptors":  [
+                                                 "21-sample: CHECK[floor \u003e 0] for sample is NC=T"
+                                             ]
+                         },
+                         {
+                             "id":  "R23",
+                             "expectedResult":  true,
+                             "requiresComparisonRow":  false,
+                             "predicate":  "((Match[≠[sample: id]] ∧ ¬Null[sample: id]) ∧ ¬Null[sample: amount] ∧ (Match[≠[sample: code]] ∨ Null[sample: code]) ∧ (Match[=[sample: parent_id -\u003e parent: id]] ∨ Null[sample: parent_id]) ∧ (Exp[sample: amount \u003e= 10] ∨ Null[sample: amount]) ∧ (Exp[sample: amount \u003c= ceiling] ∨ Null[sample: amount] ∨ Null[sample: ceiling]) ∧ (Exp[sample: ceiling \u003c 100] ∨ Null[sample: ceiling]) ∧ (Exp[sample: floor \u003e 0] ∧ ¬Null[sample: floor]))",
+                             "failedDuringGeneration":  false,
+                             "descriptors":  [
+                                                 "22-sample: CHECK[floor \u003e 0] for sample is CC=T"
+                                             ]
+                         },
+                         {
+                             "id":  "R24",
+                             "expectedResult":  false,
+                             "requiresComparisonRow":  false,
+                             "predicate":  "((Match[≠[sample: id]] ∧ ¬Null[sample: id]) ∧ ¬Null[sample: amount] ∧ (Match[≠[sample: code]] ∨ Null[sample: code]) ∧ (Match[=[sample: parent_id -\u003e parent: id]] ∨ Null[sample: parent_id]) ∧ (Exp[sample: amount \u003e= 10] ∨ Null[sample: amount]) ∧ (Exp[sample: amount \u003c= ceiling] ∨ Null[sample: amount] ∨ Null[sample: ceiling]) ∧ (Exp[sample: ceiling \u003c 100] ∨ Null[sample: ceiling]) ∧ (¬Exp[sample: floor \u003e 0] ∧ ¬Null[sample: floor]))",
+                             "failedDuringGeneration":  false,
+                             "descriptors":  [
+                                                 "23-sample: CHECK[floor \u003e 0] for sample is CC=F"
+                                             ]
+                         }
+                     ],
+    "tests":  [
+                  {
+                      "id":  "T1",
+                      "expectedResult":  true,
+                      "sourceRequirementId":  "R1",
+                      "coveredRequirementIds":  [
+                                                    "R1"
+                                                ],
+                      "state":  [
+                                    {
+                                        "table":  "parent",
+                                        "values":  {
+                                                       "id":  "0"
+                                                   }
+                                    }
+                                ],
+                      "data":  [
+                                   {
+                                       "table":  "parent",
+                                       "values":  {
+                                                      "id":  "1"
+                                                  }
+                                   }
+                               ],
+                      "stateSql":  [
+                                       "INSERT INTO \"parent\"(\r\n\t\"id\"\r\n) VALUES (\r\n\t0\r\n)\r\n;"
+                                   ],
+                      "dataSql":  [
+                                      "INSERT INTO \"parent\"(\r\n\t\"id\"\r\n) VALUES (\r\n\t1\r\n)\r\n;"
+                                  ],
+                      "stateInsertCount":  1,
+                      "dataInsertCount":  1,
+                      "postgresValidation":  {
+                                                 "phase":  "data",
+                                                 "actualResult":  true,
+                                                 "sqlstate":  "",
+                                                 "constraintName":  ""
+                                             }
+                  },
+                  {
+                      "id":  "T2",
+                      "expectedResult":  false,
+                      "sourceRequirementId":  "R2",
+                      "coveredRequirementIds":  [
+                                                    "R2"
+                                                ],
+                      "state":  [
+                                    {
+                                        "table":  "parent",
+                                        "values":  {
+                                                       "id":  "0"
+                                                   }
+                                    }
+                                ],
+                      "data":  [
+                                   {
+                                       "table":  "parent",
+                                       "values":  {
+                                                      "id":  null
+                                                  }
+                                   }
+                               ],
+                      "stateSql":  [
+                                       "INSERT INTO \"parent\"(\r\n\t\"id\"\r\n) VALUES (\r\n\t0\r\n)\r\n;"
+                                   ],
+                      "dataSql":  [
+                                      "INSERT INTO \"parent\"(\r\n\t\"id\"\r\n) VALUES (\r\n\tNULL\r\n)\r\n;"
+                                  ],
+                      "stateInsertCount":  1,
+                      "dataInsertCount":  1,
+                      "postgresValidation":  {
+                                                 "phase":  "data",
+                                                 "actualResult":  false,
+                                                 "sqlstate":  "23502",
+                                                 "constraintName":  ""
+                                             }
+                  },
+                  {
+                      "id":  "T3",
+                      "expectedResult":  false,
+                      "sourceRequirementId":  "R3",
+                      "coveredRequirementIds":  [
+                                                    "R3"
+                                                ],
+                      "state":  [
+                                    {
+                                        "table":  "parent",
+                                        "values":  {
+                                                       "id":  "0"
+                                                   }
+                                    }
+                                ],
+                      "data":  [
+                                   {
+                                       "table":  "parent",
+                                       "values":  {
+                                                      "id":  "0"
+                                                  }
+                                   }
+                               ],
+                      "stateSql":  [
+                                       "INSERT INTO \"parent\"(\r\n\t\"id\"\r\n) VALUES (\r\n\t0\r\n)\r\n;"
+                                   ],
+                      "dataSql":  [
+                                      "INSERT INTO \"parent\"(\r\n\t\"id\"\r\n) VALUES (\r\n\t0\r\n)\r\n;"
+                                  ],
+                      "stateInsertCount":  1,
+                      "dataInsertCount":  1,
+                      "postgresValidation":  {
+                                                 "phase":  "data",
+                                                 "actualResult":  false,
+                                                 "sqlstate":  "23505",
+                                                 "constraintName":  ""
+                                             }
+                  },
+                  {
+                      "id":  "T4",
+                      "expectedResult":  true,
+                      "sourceRequirementId":  "R4",
+                      "coveredRequirementIds":  [
+                                                    "R4",
+                                                    "R8"
+                                                ],
+                      "state":  [
+                                    {
+                                        "table":  "parent",
+                                        "values":  {
+                                                       "id":  "0"
+                                                   }
+                                    },
+                                    {
+                                        "table":  "sample",
+                                        "values":  {
+                                                       "id":  "0",
+                                                       "parent_id":  "0",
+                                                       "code":  "969",
+                                                       "amount":  "10",
+                                                       "ceiling":  "10",
+                                                       "floor":  "1"
+                                                   }
+                                    }
+                                ],
+                      "data":  [
+                                   {
+                                       "table":  "sample",
+                                       "values":  {
+                                                      "id":  "1",
+                                                      "parent_id":  null,
+                                                      "code":  null,
+                                                      "amount":  "10",
+                                                      "ceiling":  null,
+                                                      "floor":  "969"
+                                                  }
+                                   }
+                               ],
+                      "stateSql":  [
+                                       "INSERT INTO \"parent\"(\r\n\t\"id\"\r\n) VALUES (\r\n\t0\r\n)\r\n;",
+                                       "INSERT INTO \"sample\"(\r\n\t\"id\", \"parent_id\", \"code\", \"amount\", \"ceiling\", \"floor\"\r\n) VALUES (\r\n\t0, 0, 969, 10, 10, 1\r\n)\r\n;"
+                                   ],
+                      "dataSql":  [
+                                      "INSERT INTO \"sample\"(\r\n\t\"id\", \"parent_id\", \"code\", \"amount\", \"ceiling\", \"floor\"\r\n) VALUES (\r\n\t1, NULL, NULL, 10, NULL, 969\r\n)\r\n;"
+                                  ],
+                      "stateInsertCount":  2,
+                      "dataInsertCount":  1,
+                      "postgresValidation":  {
+                                                 "phase":  "data",
+                                                 "actualResult":  true,
+                                                 "sqlstate":  "",
+                                                 "constraintName":  ""
+                                             }
+                  },
+                  {
+                      "id":  "T5",
+                      "expectedResult":  false,
+                      "sourceRequirementId":  "R5",
+                      "coveredRequirementIds":  [
+                                                    "R5"
+                                                ],
+                      "state":  [
+                                    {
+                                        "table":  "parent",
+                                        "values":  {
+                                                       "id":  "0"
+                                                   }
+                                    },
+                                    {
+                                        "table":  "sample",
+                                        "values":  {
+                                                       "id":  "0",
+                                                       "parent_id":  "0",
+                                                       "code":  "969",
+                                                       "amount":  "10",
+                                                       "ceiling":  "10",
+                                                       "floor":  "1"
+                                                   }
+                                    }
+                                ],
+                      "data":  [
+                                   {
+                                       "table":  "sample",
+                                       "values":  {
+                                                      "id":  null,
+                                                      "parent_id":  null,
+                                                      "code":  "0",
+                                                      "amount":  "54",
+                                                      "ceiling":  "67",
+                                                      "floor":  null
+                                                  }
+                                   }
+                               ],
+                      "stateSql":  [
+                                       "INSERT INTO \"parent\"(\r\n\t\"id\"\r\n) VALUES (\r\n\t0\r\n)\r\n;",
+                                       "INSERT INTO \"sample\"(\r\n\t\"id\", \"parent_id\", \"code\", \"amount\", \"ceiling\", \"floor\"\r\n) VALUES (\r\n\t0, 0, 969, 10, 10, 1\r\n)\r\n;"
+                                   ],
+                      "dataSql":  [
+                                      "INSERT INTO \"sample\"(\r\n\t\"id\", \"parent_id\", \"code\", \"amount\", \"ceiling\", \"floor\"\r\n) VALUES (\r\n\tNULL, NULL, 0, 54, 67, NULL\r\n)\r\n;"
+                                  ],
+                      "stateInsertCount":  2,
+                      "dataInsertCount":  1,
+                      "postgresValidation":  {
+                                                 "phase":  "data",
+                                                 "actualResult":  false,
+                                                 "sqlstate":  "23502",
+                                                 "constraintName":  ""
+                                             }
+                  },
+                  {
+                      "id":  "T6",
+                      "expectedResult":  false,
+                      "sourceRequirementId":  "R6",
+                      "coveredRequirementIds":  [
+                                                    "R6"
+                                                ],
+                      "state":  [
+                                    {
+                                        "table":  "parent",
+                                        "values":  {
+                                                       "id":  "0"
+                                                   }
+                                    },
+                                    {
+                                        "table":  "sample",
+                                        "values":  {
+                                                       "id":  "0",
+                                                       "parent_id":  "0",
+                                                       "code":  "969",
+                                                       "amount":  "10",
+                                                       "ceiling":  "10",
+                                                       "floor":  "1"
+                                                   }
+                                    }
+                                ],
+                      "data":  [
+                                   {
+                                       "table":  "sample",
+                                       "values":  {
+                                                      "id":  "0",
+                                                      "parent_id":  null,
+                                                      "code":  "425",
+                                                      "amount":  "890",
+                                                      "ceiling":  null,
+                                                      "floor":  "572"
+                                                  }
+                                   }
+                               ],
+                      "stateSql":  [
+                                       "INSERT INTO \"parent\"(\r\n\t\"id\"\r\n) VALUES (\r\n\t0\r\n)\r\n;",
+                                       "INSERT INTO \"sample\"(\r\n\t\"id\", \"parent_id\", \"code\", \"amount\", \"ceiling\", \"floor\"\r\n) VALUES (\r\n\t0, 0, 969, 10, 10, 1\r\n)\r\n;"
+                                   ],
+                      "dataSql":  [
+                                      "INSERT INTO \"sample\"(\r\n\t\"id\", \"parent_id\", \"code\", \"amount\", \"ceiling\", \"floor\"\r\n) VALUES (\r\n\t0, NULL, 425, 890, NULL, 572\r\n)\r\n;"
+                                  ],
+                      "stateInsertCount":  2,
+                      "dataInsertCount":  1,
+                      "postgresValidation":  {
+                                                 "phase":  "data",
+                                                 "actualResult":  false,
+                                                 "sqlstate":  "23505",
+                                                 "constraintName":  ""
+                                             }
+                  },
+                  {
+                      "id":  "T7",
+                      "expectedResult":  false,
+                      "sourceRequirementId":  "R7",
+                      "coveredRequirementIds":  [
+                                                    "R7"
+                                                ],
+                      "state":  [
+                                    {
+                                        "table":  "parent",
+                                        "values":  {
+                                                       "id":  "0"
+                                                   }
+                                    }
+                                ],
+                      "data":  [
+                                   {
+                                       "table":  "sample",
+                                       "values":  {
+                                                      "id":  "0",
+                                                      "parent_id":  "0",
+                                                      "code":  "0",
+                                                      "amount":  null,
+                                                      "ceiling":  "0",
+                                                      "floor":  null
+                                                  }
+                                   }
+                               ],
+                      "stateSql":  [
+                                       "INSERT INTO \"parent\"(\r\n\t\"id\"\r\n) VALUES (\r\n\t0\r\n)\r\n;"
+                                   ],
+                      "dataSql":  [
+                                      "INSERT INTO \"sample\"(\r\n\t\"id\", \"parent_id\", \"code\", \"amount\", \"ceiling\", \"floor\"\r\n) VALUES (\r\n\t0, 0, 0, NULL, 0, NULL\r\n)\r\n;"
+                                  ],
+                      "stateInsertCount":  1,
+                      "dataInsertCount":  1,
+                      "postgresValidation":  {
+                                                 "phase":  "data",
+                                                 "actualResult":  false,
+                                                 "sqlstate":  "23502",
+                                                 "constraintName":  ""
+                                             }
+                  },
+                  {
+                      "id":  "T8",
+                      "expectedResult":  true,
+                      "sourceRequirementId":  "R8",
+                      "coveredRequirementIds":  [
+                                                    "R4",
+                                                    "R8"
+                                                ],
+                      "state":  [
+                                    {
+                                        "table":  "parent",
+                                        "values":  {
+                                                       "id":  "0"
+                                                   }
+                                    },
+                                    {
+                                        "table":  "sample",
+                                        "values":  {
+                                                       "id":  "0",
+                                                       "parent_id":  "0",
+                                                       "code":  "969",
+                                                       "amount":  "10",
+                                                       "ceiling":  "10",
+                                                       "floor":  "1"
+                                                   }
+                                    }
+                                ],
+                      "data":  [
+                                   {
+                                       "table":  "sample",
+                                       "values":  {
+                                                      "id":  "-660",
+                                                      "parent_id":  null,
+                                                      "code":  null,
+                                                      "amount":  "10",
+                                                      "ceiling":  null,
+                                                      "floor":  null
+                                                  }
+                                   }
+                               ],
+                      "stateSql":  [
+                                       "INSERT INTO \"parent\"(\r\n\t\"id\"\r\n) VALUES (\r\n\t0\r\n)\r\n;",
+                                       "INSERT INTO \"sample\"(\r\n\t\"id\", \"parent_id\", \"code\", \"amount\", \"ceiling\", \"floor\"\r\n) VALUES (\r\n\t0, 0, 969, 10, 10, 1\r\n)\r\n;"
+                                   ],
+                      "dataSql":  [
+                                      "INSERT INTO \"sample\"(\r\n\t\"id\", \"parent_id\", \"code\", \"amount\", \"ceiling\", \"floor\"\r\n) VALUES (\r\n\t-660, NULL, NULL, 10, NULL, NULL\r\n)\r\n;"
+                                  ],
+                      "stateInsertCount":  2,
+                      "dataInsertCount":  1,
+                      "postgresValidation":  {
+                                                 "phase":  "data",
+                                                 "actualResult":  true,
+                                                 "sqlstate":  "",
+                                                 "constraintName":  ""
+                                             }
+                  },
+                  {
+                      "id":  "T9",
+                      "expectedResult":  true,
+                      "sourceRequirementId":  "R9",
+                      "coveredRequirementIds":  [
+                                                    "R4",
+                                                    "R9"
+                                                ],
+                      "state":  [
+                                    {
+                                        "table":  "parent",
+                                        "values":  {
+                                                       "id":  "0"
+                                                   }
+                                    },
+                                    {
+                                        "table":  "sample",
+                                        "values":  {
+                                                       "id":  "0",
+                                                       "parent_id":  "0",
+                                                       "code":  "969",
+                                                       "amount":  "10",
+                                                       "ceiling":  "10",
+                                                       "floor":  "1"
+                                                   }
+                                    }
+                                ],
+                      "data":  [
+                                   {
+                                       "table":  "sample",
+                                       "values":  {
+                                                      "id":  "1",
+                                                      "parent_id":  null,
+                                                      "code":  "-489",
+                                                      "amount":  "127",
+                                                      "ceiling":  null,
+                                                      "floor":  null
+                                                  }
+                                   }
+                               ],
+                      "stateSql":  [
+                                       "INSERT INTO \"parent\"(\r\n\t\"id\"\r\n) VALUES (\r\n\t0\r\n)\r\n;",
+                                       "INSERT INTO \"sample\"(\r\n\t\"id\", \"parent_id\", \"code\", \"amount\", \"ceiling\", \"floor\"\r\n) VALUES (\r\n\t0, 0, 969, 10, 10, 1\r\n)\r\n;"
+                                   ],
+                      "dataSql":  [
+                                      "INSERT INTO \"sample\"(\r\n\t\"id\", \"parent_id\", \"code\", \"amount\", \"ceiling\", \"floor\"\r\n) VALUES (\r\n\t1, NULL, -489, 127, NULL, NULL\r\n)\r\n;"
+                                  ],
+                      "stateInsertCount":  2,
+                      "dataInsertCount":  1,
+                      "postgresValidation":  {
+                                                 "phase":  "data",
+                                                 "actualResult":  true,
+                                                 "sqlstate":  "",
+                                                 "constraintName":  ""
+                                             }
+                  },
+                  {
+                      "id":  "T10",
+                      "expectedResult":  false,
+                      "sourceRequirementId":  "R10",
+                      "coveredRequirementIds":  [
+                                                    "R10"
+                                                ],
+                      "state":  [
+                                    {
+                                        "table":  "parent",
+                                        "values":  {
+                                                       "id":  "0"
+                                                   }
+                                    },
+                                    {
+                                        "table":  "sample",
+                                        "values":  {
+                                                       "id":  "0",
+                                                       "parent_id":  "0",
+                                                       "code":  "969",
+                                                       "amount":  "10",
+                                                       "ceiling":  "10",
+                                                       "floor":  "1"
+                                                   }
+                                    }
+                                ],
+                      "data":  [
+                                   {
+                                       "table":  "sample",
+                                       "values":  {
+                                                      "id":  "426",
+                                                      "parent_id":  null,
+                                                      "code":  "969",
+                                                      "amount":  "100",
+                                                      "ceiling":  null,
+                                                      "floor":  "10"
+                                                  }
+                                   }
+                               ],
+                      "stateSql":  [
+                                       "INSERT INTO \"parent\"(\r\n\t\"id\"\r\n) VALUES (\r\n\t0\r\n)\r\n;",
+                                       "INSERT INTO \"sample\"(\r\n\t\"id\", \"parent_id\", \"code\", \"amount\", \"ceiling\", \"floor\"\r\n) VALUES (\r\n\t0, 0, 969, 10, 10, 1\r\n)\r\n;"
+                                   ],
+                      "dataSql":  [
+                                      "INSERT INTO \"sample\"(\r\n\t\"id\", \"parent_id\", \"code\", \"amount\", \"ceiling\", \"floor\"\r\n) VALUES (\r\n\t426, NULL, 969, 100, NULL, 10\r\n)\r\n;"
+                                  ],
+                      "stateInsertCount":  2,
+                      "dataInsertCount":  1,
+                      "postgresValidation":  {
+                                                 "phase":  "data",
+                                                 "actualResult":  false,
+                                                 "sqlstate":  "23505",
+                                                 "constraintName":  ""
+                                             }
+                  },
+                  {
+                      "id":  "T11",
+                      "expectedResult":  true,
+                      "sourceRequirementId":  "R11",
+                      "coveredRequirementIds":  [
+                                                    "R11",
+                                                    "R14",
+                                                    "R16",
+                                                    "R19",
+                                                    "R23"
+                                                ],
+                      "state":  [
+                                    {
+                                        "table":  "parent",
+                                        "values":  {
+                                                       "id":  "0"
+                                                   }
+                                    }
+                                ],
+                      "data":  [
+                                   {
+                                       "table":  "sample",
+                                       "values":  {
+                                                      "id":  "-294",
+                                                      "parent_id":  null,
+                                                      "code":  "-377",
+                                                      "amount":  "227",
+                                                      "ceiling":  null,
+                                                      "floor":  "635"
+                                                  }
+                                   }
+                               ],
+                      "stateSql":  [
+                                       "INSERT INTO \"parent\"(\r\n\t\"id\"\r\n) VALUES (\r\n\t0\r\n)\r\n;"
+                                   ],
+                      "dataSql":  [
+                                      "INSERT INTO \"sample\"(\r\n\t\"id\", \"parent_id\", \"code\", \"amount\", \"ceiling\", \"floor\"\r\n) VALUES (\r\n\t-294, NULL, -377, 227, NULL, 635\r\n)\r\n;"
+                                  ],
+                      "stateInsertCount":  1,
+                      "dataInsertCount":  1,
+                      "postgresValidation":  {
+                                                 "phase":  "data",
+                                                 "actualResult":  true,
+                                                 "sqlstate":  "",
+                                                 "constraintName":  ""
+                                             }
+                  },
+                  {
+                      "id":  "T12",
+                      "expectedResult":  true,
+                      "sourceRequirementId":  "R12",
+                      "coveredRequirementIds":  [
+                                                    "R12",
+                                                    "R14",
+                                                    "R16",
+                                                    "R19",
+                                                    "R22"
+                                                ],
+                      "state":  [
+                                    {
+                                        "table":  "parent",
+                                        "values":  {
+                                                       "id":  "0"
+                                                   }
+                                    }
+                                ],
+                      "data":  [
+                                   {
+                                       "table":  "sample",
+                                       "values":  {
+                                                      "id":  "-499",
+                                                      "parent_id":  "0",
+                                                      "code":  "-846",
+                                                      "amount":  "380",
+                                                      "ceiling":  null,
+                                                      "floor":  null
+                                                  }
+                                   }
+                               ],
+                      "stateSql":  [
+                                       "INSERT INTO \"parent\"(\r\n\t\"id\"\r\n) VALUES (\r\n\t0\r\n)\r\n;"
+                                   ],
+                      "dataSql":  [
+                                      "INSERT INTO \"sample\"(\r\n\t\"id\", \"parent_id\", \"code\", \"amount\", \"ceiling\", \"floor\"\r\n) VALUES (\r\n\t-499, 0, -846, 380, NULL, NULL\r\n)\r\n;"
+                                  ],
+                      "stateInsertCount":  1,
+                      "dataInsertCount":  1,
+                      "postgresValidation":  {
+                                                 "phase":  "data",
+                                                 "actualResult":  true,
+                                                 "sqlstate":  "",
+                                                 "constraintName":  ""
+                                             }
+                  },
+                  {
+                      "id":  "T13",
+                      "expectedResult":  false,
+                      "sourceRequirementId":  "R13",
+                      "coveredRequirementIds":  [
+                                                    "R13"
+                                                ],
+                      "state":  [
+                                    {
+                                        "table":  "parent",
+                                        "values":  {
+                                                       "id":  "0"
+                                                   }
+                                    }
+                                ],
+                      "data":  [
+                                   {
+                                       "table":  "sample",
+                                       "values":  {
+                                                      "id":  "971",
+                                                      "parent_id":  "-454",
+                                                      "code":  "-565",
+                                                      "amount":  "100",
+                                                      "ceiling":  null,
+                                                      "floor":  "699"
+                                                  }
+                                   }
+                               ],
+                      "stateSql":  [
+                                       "INSERT INTO \"parent\"(\r\n\t\"id\"\r\n) VALUES (\r\n\t0\r\n)\r\n;"
+                                   ],
+                      "dataSql":  [
+                                      "INSERT INTO \"sample\"(\r\n\t\"id\", \"parent_id\", \"code\", \"amount\", \"ceiling\", \"floor\"\r\n) VALUES (\r\n\t971, -454, -565, 100, NULL, 699\r\n)\r\n;"
+                                  ],
+                      "stateInsertCount":  1,
+                      "dataInsertCount":  1,
+                      "postgresValidation":  {
+                                                 "phase":  "data",
+                                                 "actualResult":  false,
+                                                 "sqlstate":  "23503",
+                                                 "constraintName":  ""
+                                             }
+                  },
+                  {
+                      "id":  "T14",
+                      "expectedResult":  true,
+                      "sourceRequirementId":  "R14",
+                      "coveredRequirementIds":  [
+                                                    "R12",
+                                                    "R14",
+                                                    "R16",
+                                                    "R19",
+                                                    "R23"
+                                                ],
+                      "state":  [
+                                    {
+                                        "table":  "parent",
+                                        "values":  {
+                                                       "id":  "0"
+                                                   }
+                                    }
+                                ],
+                      "data":  [
+                                   {
+                                       "table":  "sample",
+                                       "values":  {
+                                                      "id":  "-59",
+                                                      "parent_id":  "0",
+                                                      "code":  null,
+                                                      "amount":  "10",
+                                                      "ceiling":  null,
+                                                      "floor":  "490"
+                                                  }
+                                   }
+                               ],
+                      "stateSql":  [
+                                       "INSERT INTO \"parent\"(\r\n\t\"id\"\r\n) VALUES (\r\n\t0\r\n)\r\n;"
+                                   ],
+                      "dataSql":  [
+                                      "INSERT INTO \"sample\"(\r\n\t\"id\", \"parent_id\", \"code\", \"amount\", \"ceiling\", \"floor\"\r\n) VALUES (\r\n\t-59, 0, NULL, 10, NULL, 490\r\n)\r\n;"
+                                  ],
+                      "stateInsertCount":  1,
+                      "dataInsertCount":  1,
+                      "postgresValidation":  {
+                                                 "phase":  "data",
+                                                 "actualResult":  true,
+                                                 "sqlstate":  "",
+                                                 "constraintName":  ""
+                                             }
+                  },
+                  {
+                      "id":  "T15",
+                      "expectedResult":  false,
+                      "sourceRequirementId":  "R15",
+                      "coveredRequirementIds":  [
+                                                    "R15"
+                                                ],
+                      "state":  [
+                                    {
+                                        "table":  "parent",
+                                        "values":  {
+                                                       "id":  "0"
+                                                   }
+                                    }
+                                ],
+                      "data":  [
+                                   {
+                                       "table":  "sample",
+                                       "values":  {
+                                                      "id":  "0",
+                                                      "parent_id":  "0",
+                                                      "code":  "0",
+                                                      "amount":  "0",
+                                                      "ceiling":  "0",
+                                                      "floor":  null
+                                                  }
+                                   }
+                               ],
+                      "stateSql":  [
+                                       "INSERT INTO \"parent\"(\r\n\t\"id\"\r\n) VALUES (\r\n\t0\r\n)\r\n;"
+                                   ],
+                      "dataSql":  [
+                                      "INSERT INTO \"sample\"(\r\n\t\"id\", \"parent_id\", \"code\", \"amount\", \"ceiling\", \"floor\"\r\n) VALUES (\r\n\t0, 0, 0, 0, 0, NULL\r\n)\r\n;"
+                                  ],
+                      "stateInsertCount":  1,
+                      "dataInsertCount":  1,
+                      "postgresValidation":  {
+                                                 "phase":  "data",
+                                                 "actualResult":  false,
+                                                 "sqlstate":  "23514",
+                                                 "constraintName":  "amount_min"
+                                             }
+                  },
+                  {
+                      "id":  "T16",
+                      "expectedResult":  true,
+                      "sourceRequirementId":  "R16",
+                      "coveredRequirementIds":  [
+                                                    "R12",
+                                                    "R14",
+                                                    "R16",
+                                                    "R19",
+                                                    "R22"
+                                                ],
+                      "state":  [
+                                    {
+                                        "table":  "parent",
+                                        "values":  {
+                                                       "id":  "0"
+                                                   }
+                                    }
+                                ],
+                      "data":  [
+                                   {
+                                       "table":  "sample",
+                                       "values":  {
+                                                      "id":  "0",
+                                                      "parent_id":  "0",
+                                                      "code":  "0",
+                                                      "amount":  "15",
+                                                      "ceiling":  null,
+                                                      "floor":  null
+                                                  }
+                                   }
+                               ],
+                      "stateSql":  [
+                                       "INSERT INTO \"parent\"(\r\n\t\"id\"\r\n) VALUES (\r\n\t0\r\n)\r\n;"
+                                   ],
+                      "dataSql":  [
+                                      "INSERT INTO \"sample\"(\r\n\t\"id\", \"parent_id\", \"code\", \"amount\", \"ceiling\", \"floor\"\r\n) VALUES (\r\n\t0, 0, 0, 15, NULL, NULL\r\n)\r\n;"
+                                  ],
+                      "stateInsertCount":  1,
+                      "dataInsertCount":  1,
+                      "postgresValidation":  {
+                                                 "phase":  "data",
+                                                 "actualResult":  true,
+                                                 "sqlstate":  "",
+                                                 "constraintName":  ""
+                                             }
+                  },
+                  {
+                      "id":  "T17",
+                      "expectedResult":  true,
+                      "sourceRequirementId":  "R17",
+                      "coveredRequirementIds":  [
+                                                    "R11",
+                                                    "R14",
+                                                    "R17",
+                                                    "R20",
+                                                    "R22"
+                                                ],
+                      "state":  [
+                                    {
+                                        "table":  "parent",
+                                        "values":  {
+                                                       "id":  "0"
+                                                   }
+                                    }
+                                ],
+                      "data":  [
+                                   {
+                                       "table":  "sample",
+                                       "values":  {
+                                                      "id":  "100",
+                                                      "parent_id":  null,
+                                                      "code":  "10",
+                                                      "amount":  "44",
+                                                      "ceiling":  "99",
+                                                      "floor":  null
+                                                  }
+                                   }
+                               ],
+                      "stateSql":  [
+                                       "INSERT INTO \"parent\"(\r\n\t\"id\"\r\n) VALUES (\r\n\t0\r\n)\r\n;"
+                                   ],
+                      "dataSql":  [
+                                      "INSERT INTO \"sample\"(\r\n\t\"id\", \"parent_id\", \"code\", \"amount\", \"ceiling\", \"floor\"\r\n) VALUES (\r\n\t100, NULL, 10, 44, 99, NULL\r\n)\r\n;"
+                                  ],
+                      "stateInsertCount":  1,
+                      "dataInsertCount":  1,
+                      "postgresValidation":  {
+                                                 "phase":  "data",
+                                                 "actualResult":  true,
+                                                 "sqlstate":  "",
+                                                 "constraintName":  ""
+                                             }
+                  },
+                  {
+                      "id":  "T18",
+                      "expectedResult":  false,
+                      "sourceRequirementId":  "R18",
+                      "coveredRequirementIds":  [
+                                                    "R18"
+                                                ],
+                      "state":  [
+                                    {
+                                        "table":  "parent",
+                                        "values":  {
+                                                       "id":  "0"
+                                                   }
+                                    }
+                                ],
+                      "data":  [
+                                   {
+                                       "table":  "sample",
+                                       "values":  {
+                                                      "id":  "0",
+                                                      "parent_id":  "0",
+                                                      "code":  "0",
+                                                      "amount":  "15",
+                                                      "ceiling":  "0",
+                                                      "floor":  null
+                                                  }
+                                   }
+                               ],
+                      "stateSql":  [
+                                       "INSERT INTO \"parent\"(\r\n\t\"id\"\r\n) VALUES (\r\n\t0\r\n)\r\n;"
+                                   ],
+                      "dataSql":  [
+                                      "INSERT INTO \"sample\"(\r\n\t\"id\", \"parent_id\", \"code\", \"amount\", \"ceiling\", \"floor\"\r\n) VALUES (\r\n\t0, 0, 0, 15, 0, NULL\r\n)\r\n;"
+                                  ],
+                      "stateInsertCount":  1,
+                      "dataInsertCount":  1,
+                      "postgresValidation":  {
+                                                 "phase":  "data",
+                                                 "actualResult":  false,
+                                                 "sqlstate":  "23514",
+                                                 "constraintName":  "amount_ceiling"
+                                             }
+                  },
+                  {
+                      "id":  "T19",
+                      "expectedResult":  true,
+                      "sourceRequirementId":  "R19",
+                      "coveredRequirementIds":  [
+                                                    "R12",
+                                                    "R14",
+                                                    "R16",
+                                                    "R19",
+                                                    "R22"
+                                                ],
+                      "state":  [
+                                    {
+                                        "table":  "parent",
+                                        "values":  {
+                                                       "id":  "0"
+                                                   }
+                                    }
+                                ],
+                      "data":  [
+                                   {
+                                       "table":  "sample",
+                                       "values":  {
+                                                      "id":  "0",
+                                                      "parent_id":  "0",
+                                                      "code":  "0",
+                                                      "amount":  "15",
+                                                      "ceiling":  null,
+                                                      "floor":  null
+                                                  }
+                                   }
+                               ],
+                      "stateSql":  [
+                                       "INSERT INTO \"parent\"(\r\n\t\"id\"\r\n) VALUES (\r\n\t0\r\n)\r\n;"
+                                   ],
+                      "dataSql":  [
+                                      "INSERT INTO \"sample\"(\r\n\t\"id\", \"parent_id\", \"code\", \"amount\", \"ceiling\", \"floor\"\r\n) VALUES (\r\n\t0, 0, 0, 15, NULL, NULL\r\n)\r\n;"
+                                  ],
+                      "stateInsertCount":  1,
+                      "dataInsertCount":  1,
+                      "postgresValidation":  {
+                                                 "phase":  "data",
+                                                 "actualResult":  true,
+                                                 "sqlstate":  "",
+                                                 "constraintName":  ""
+                                             }
+                  },
+                  {
+                      "id":  "T20",
+                      "expectedResult":  true,
+                      "sourceRequirementId":  "R20",
+                      "coveredRequirementIds":  [
+                                                    "R11",
+                                                    "R14",
+                                                    "R17",
+                                                    "R20",
+                                                    "R22"
+                                                ],
+                      "state":  [
+                                    {
+                                        "table":  "parent",
+                                        "values":  {
+                                                       "id":  "0"
+                                                   }
+                                    }
+                                ],
+                      "data":  [
+                                   {
+                                       "table":  "sample",
+                                       "values":  {
+                                                      "id":  "79",
+                                                      "parent_id":  null,
+                                                      "code":  null,
+                                                      "amount":  "98",
+                                                      "ceiling":  "99",
+                                                      "floor":  null
+                                                  }
+                                   }
+                               ],
+                      "stateSql":  [
+                                       "INSERT INTO \"parent\"(\r\n\t\"id\"\r\n) VALUES (\r\n\t0\r\n)\r\n;"
+                                   ],
+                      "dataSql":  [
+                                      "INSERT INTO \"sample\"(\r\n\t\"id\", \"parent_id\", \"code\", \"amount\", \"ceiling\", \"floor\"\r\n) VALUES (\r\n\t79, NULL, NULL, 98, 99, NULL\r\n)\r\n;"
+                                  ],
+                      "stateInsertCount":  1,
+                      "dataInsertCount":  1,
+                      "postgresValidation":  {
+                                                 "phase":  "data",
+                                                 "actualResult":  true,
+                                                 "sqlstate":  "",
+                                                 "constraintName":  ""
+                                             }
+                  },
+                  {
+                      "id":  "T21",
+                      "expectedResult":  false,
+                      "sourceRequirementId":  "R21",
+                      "coveredRequirementIds":  [
+                                                    "R21"
+                                                ],
+                      "state":  [
+                                    {
+                                        "table":  "parent",
+                                        "values":  {
+                                                       "id":  "0"
+                                                   }
+                                    }
+                                ],
+                      "data":  [
+                                   {
+                                       "table":  "sample",
+                                       "values":  {
+                                                      "id":  "0",
+                                                      "parent_id":  "0",
+                                                      "code":  "0",
+                                                      "amount":  "15",
+                                                      "ceiling":  "127",
+                                                      "floor":  null
+                                                  }
+                                   }
+                               ],
+                      "stateSql":  [
+                                       "INSERT INTO \"parent\"(\r\n\t\"id\"\r\n) VALUES (\r\n\t0\r\n)\r\n;"
+                                   ],
+                      "dataSql":  [
+                                      "INSERT INTO \"sample\"(\r\n\t\"id\", \"parent_id\", \"code\", \"amount\", \"ceiling\", \"floor\"\r\n) VALUES (\r\n\t0, 0, 0, 15, 127, NULL\r\n)\r\n;"
+                                  ],
+                      "stateInsertCount":  1,
+                      "dataInsertCount":  1,
+                      "postgresValidation":  {
+                                                 "phase":  "data",
+                                                 "actualResult":  false,
+                                                 "sqlstate":  "23514",
+                                                 "constraintName":  "ceiling_max"
+                                             }
+                  },
+                  {
+                      "id":  "T22",
+                      "expectedResult":  true,
+                      "sourceRequirementId":  "R22",
+                      "coveredRequirementIds":  [
+                                                    "R11",
+                                                    "R14",
+                                                    "R17",
+                                                    "R20",
+                                                    "R22"
+                                                ],
+                      "state":  [
+                                    {
+                                        "table":  "parent",
+                                        "values":  {
+                                                       "id":  "0"
+                                                   }
+                                    }
+                                ],
+                      "data":  [
+                                   {
+                                       "table":  "sample",
+                                       "values":  {
+                                                      "id":  "912",
+                                                      "parent_id":  null,
+                                                      "code":  null,
+                                                      "amount":  "10",
+                                                      "ceiling":  "10",
+                                                      "floor":  null
+                                                  }
+                                   }
+                               ],
+                      "stateSql":  [
+                                       "INSERT INTO \"parent\"(\r\n\t\"id\"\r\n) VALUES (\r\n\t0\r\n)\r\n;"
+                                   ],
+                      "dataSql":  [
+                                      "INSERT INTO \"sample\"(\r\n\t\"id\", \"parent_id\", \"code\", \"amount\", \"ceiling\", \"floor\"\r\n) VALUES (\r\n\t912, NULL, NULL, 10, 10, NULL\r\n)\r\n;"
+                                  ],
+                      "stateInsertCount":  1,
+                      "dataInsertCount":  1,
+                      "postgresValidation":  {
+                                                 "phase":  "data",
+                                                 "actualResult":  true,
+                                                 "sqlstate":  "",
+                                                 "constraintName":  ""
+                                             }
+                  },
+                  {
+                      "id":  "T23",
+                      "expectedResult":  true,
+                      "sourceRequirementId":  "R23",
+                      "coveredRequirementIds":  [
+                                                    "R11",
+                                                    "R14",
+                                                    "R16",
+                                                    "R19",
+                                                    "R23"
+                                                ],
+                      "state":  [
+                                    {
+                                        "table":  "parent",
+                                        "values":  {
+                                                       "id":  "0"
+                                                   }
+                                    }
+                                ],
+                      "data":  [
+                                   {
+                                       "table":  "sample",
+                                       "values":  {
+                                                      "id":  "52",
+                                                      "parent_id":  null,
+                                                      "code":  null,
+                                                      "amount":  "10",
+                                                      "ceiling":  null,
+                                                      "floor":  "1"
+                                                  }
+                                   }
+                               ],
+                      "stateSql":  [
+                                       "INSERT INTO \"parent\"(\r\n\t\"id\"\r\n) VALUES (\r\n\t0\r\n)\r\n;"
+                                   ],
+                      "dataSql":  [
+                                      "INSERT INTO \"sample\"(\r\n\t\"id\", \"parent_id\", \"code\", \"amount\", \"ceiling\", \"floor\"\r\n) VALUES (\r\n\t52, NULL, NULL, 10, NULL, 1\r\n)\r\n;"
+                                  ],
+                      "stateInsertCount":  1,
+                      "dataInsertCount":  1,
+                      "postgresValidation":  {
+                                                 "phase":  "data",
+                                                 "actualResult":  true,
+                                                 "sqlstate":  "",
+                                                 "constraintName":  ""
+                                             }
+                  },
+                  {
+                      "id":  "T24",
+                      "expectedResult":  false,
+                      "sourceRequirementId":  "R24",
+                      "coveredRequirementIds":  [
+                                                    "R24"
+                                                ],
+                      "state":  [
+                                    {
+                                        "table":  "parent",
+                                        "values":  {
+                                                       "id":  "0"
+                                                   }
+                                    }
+                                ],
+                      "data":  [
+                                   {
+                                       "table":  "sample",
+                                       "values":  {
+                                                      "id":  "628",
+                                                      "parent_id":  null,
+                                                      "code":  "640",
+                                                      "amount":  "10",
+                                                      "ceiling":  null,
+                                                      "floor":  "-415"
+                                                  }
+                                   }
+                               ],
+                      "stateSql":  [
+                                       "INSERT INTO \"parent\"(\r\n\t\"id\"\r\n) VALUES (\r\n\t0\r\n)\r\n;"
+                                   ],
+                      "dataSql":  [
+                                      "INSERT INTO \"sample\"(\r\n\t\"id\", \"parent_id\", \"code\", \"amount\", \"ceiling\", \"floor\"\r\n) VALUES (\r\n\t628, NULL, 640, 10, NULL, -415\r\n)\r\n;"
+                                  ],
+                      "stateInsertCount":  1,
+                      "dataInsertCount":  1,
+                      "postgresValidation":  {
+                                                 "phase":  "data",
+                                                 "actualResult":  false,
+                                                 "sqlstate":  "23514",
+                                                 "constraintName":  "floor_min"
+                                             }
+                  }
+              ]
+}

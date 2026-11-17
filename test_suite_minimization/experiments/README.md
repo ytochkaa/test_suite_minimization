@@ -13,10 +13,21 @@
 - readability: false;
 - fullreduce: false.
 
+Реальный набор артефактов для `avsDefaults`, seed `0` приложен в
+[`example-data/avsDefaults-seed0`](example-data/avsDefaults-seed0). В папке есть
+исходный `.ser`, Java JSON до и после PostgreSQL-проверки, C++-отчёт, выбранный
+набор, CSV результатов БД, SQL-схема и сведения о версии среды. Контрольная
+сумма `.ser` совпадает с `snapshotSha256` в JSON. Инструкция по локальному
+повторному запуску находится в README этой папки и в
+[`docs/BUILD_AND_TESTS.md`](../../docs/BUILD_AND_TESTS.md).
+
 Пример аргументов Java main:
 
 ```text
 org.schemaanalyst.minimization.GenerateBaselineSnapshot avsDefaults 0 10000 results/avsDefaults-0.ser
 ```
 
-Файлы `*.ser`, собранные классы и результаты запусков не добавляются в Git.
+Снимки и сырые результаты новых запусков, а также собранные классы не добавляются
+в Git. Исключение — сохранённый `.ser` в
+[`example-data/avsDefaults-seed0`](example-data/avsDefaults-seed0), который нужен
+для демонстрации реального сквозного прогона.

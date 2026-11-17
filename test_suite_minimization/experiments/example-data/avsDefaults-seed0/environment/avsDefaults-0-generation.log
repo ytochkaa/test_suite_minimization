@@ -1,0 +1,11 @@
+snapshot=C:\Users\Dashyla\Desktop\computer_security\8_semester\Courswork\test_suite_minimization\experiments\results\matrix-20261117-025251-6b4a30af\avsDefaults-0.ser
+sha256=dfa813b78e7a0ddc98d0e24220f2abbc8aa74f77d443cff69b69a074a7cbacb5
+generator=avsDefaults
+criterion=CondAICC
+seed=0
+budget=10000
+tests=24
+inserts=54
+requirements_attempted=24
+requirements_covered=24
+generation_ns=144665400

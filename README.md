@@ -137,6 +137,7 @@ Java-зависимостей не создаётся.
 | `LAUNCH_STATUS.md` | Журнал первоначальной диагностики запуска Java-эксперимента. |
 | `schema.sql` | SQL-схема для проверочных сценариев. |
 | `manual_null_oracle.sql` | Проверка семантики CHECK при NULL. |
+| `example-data/avsDefaults-seed0/` | Реальные `.ser`, JSON, C++-отчёт, SQL-схема и результаты PostgreSQL для воспроизводимого примера. |
 | `run_cpp_checks.ps1` | Сборка и тестирование C++-редуктора из PowerShell. |
 | `run_matrix.ps1` | Запуск матрицы генераторов и редукторов на независимых снимках. |
 | `validate_postgres.ps1` | Выполнение тестов в PostgreSQL и сохранение результата, SQLSTATE и ограничения. |
@@ -157,8 +158,11 @@ Java-зависимостей не создаётся.
 | `RESULTS_BASELINE.md` | Метрики, покрытие, потерянные границы и фактические ответы PostgreSQL. |
 | `старое описание.md` | Точная копия README, сохранённая перед обновлением описания проекта. |
 
-Сырые `.ser`, CSV, JSON-отчёты и логи создаются под
-`test_suite_minimization/experiments/results/` и не добавляются в Git.
+Сырые `.ser`, CSV, JSON-отчёты и логи новых запусков создаются под
+`test_suite_minimization/experiments/results/` и не добавляются в Git. Единственное
+исключение — один небольшой исходный `.ser` в
+[`example-data/avsDefaults-seed0`](./test_suite_minimization/experiments/example-data/avsDefaults-seed0),
+включённый для воспроизводимого примера.
 
 ## Сборка и тесты
 

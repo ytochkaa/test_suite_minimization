@@ -26,6 +26,22 @@
 
 Сценарий `test_suite_minimization\experiments\run_matrix.ps1` по умолчанию ожидает JDK в соседнем каталоге `..\schemaanalyst_experiments\runtime\jdk8u512-b09` и использует SchemaAnalyst из `SchemaAnalyst`. Для другой установки укажите `-JavaHome`/`-DependencyBuild` и при необходимости измените пути к CMake, компилятору, CTest и PostgreSQL в начале сценария.
 
+### Подготовить PostgreSQL для экспериментов
+
+Установите и запустите службу PostgreSQL. В базовом прогоне использовались PostgreSQL 18.7, адрес `127.0.0.1`, порт `55432`, пользователь `baseline` и отдельная база `coursework_validation`. Если PostgreSQL слушает другой порт, передайте его через `-PostgresPort` либо `-Port`.
+
+Создайте роль с правом создавать тестовую базу, подключившись администратором PostgreSQL:
+
+```powershell
+$psql = 'C:\Program Files\PostgreSQL\18\bin\psql.exe'
+& $psql -h 127.0.0.1 -p 55432 -U postgres -d postgres `
+  -c 'CREATE ROLE baseline LOGIN CREATEDB;'
+```
+
+Если роль уже существует, используйте `ALTER ROLE baseline LOGIN CREATEDB`. При парольной аутентификации сохраните пароль в стандартном `pgpass.conf`, так как сценарии запускают `psql.exe` и `createdb.exe` без интерактивного запроса.
+
+> **Важно:** `validate_postgres.ps1` перед каждым тестом выполняет `DROP SCHEMA public CASCADE`, затем создаёт схему заново. Используйте отдельную пустую базу, например `coursework_validation`; не направляйте сценарий на рабочую базу с ценными таблицами. Если базы ещё нет, валидатор создаст её от имени пользователя, которому выдано право `CREATEDB`.
+
 ## Собрать SchemaAnalyst
 
 В PowerShell из корня проекта:
@@ -83,6 +99,28 @@
 ```
 
 Программа печатает число входных тестов, требований и границ, а полный отчёт записывает в указанный выходной JSON.
+
+## Проверить приложенный реальный пример
+
+В [`test_suite_minimization\experiments\example-data\avsDefaults-seed0`](../test_suite_minimization/experiments/example-data/avsDefaults-seed0) лежат файлы реального запуска: исходный Java `.ser`, Java JSON-экспорт, JSON с результатом PostgreSQL, отчёт C++-редуктора, выбранный JSON и CSV ответов PostgreSQL. Описание каждого файла и контрольная сумма снимка находятся в README этой папки.
+
+После сборки C++ и настройки отдельной тестовой базы выполните команды из корня репозитория:
+
+```powershell
+$example = '.\test_suite_minimization\experiments\example-data\avsDefaults-seed0'
+$exe = '.\test_suite_minimization\build\cpp\test_suite_minimization.exe'
+& $exe `
+  (Join-Path $example 'input\avsDefaults-0-full-validated.json') `
+  '.\test_suite_minimization\build\cpp\example-full-report.json'
+
+& '.\test_suite_minimization\experiments\validate_postgres.ps1' `
+  -InputJson (Join-Path $example 'output\avsDefaults-0-boundaryAware.json') `
+  -HostName '127.0.0.1' -Port 55432 `
+  -User 'baseline' -Database 'coursework_validation' `
+  -ResultPath '.\test_suite_minimization\build\example-boundaryAware-postgres.csv'
+```
+
+Первая команда должна показать 24 исходных теста, 24 требования и 8 подтверждённых границ; в отчёте ожидается 18 выбранных тестов. Вторая команда повторно выполняет выбранные тесты на вашей базе и создаёт CSV в `build`. Если PostgreSQL или его утилиты установлены не по пути из сценария, укажите `-Psql` и `-Createdb`.
 
 ## Выполнить ручной SQL oracle
 
