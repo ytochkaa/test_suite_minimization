@@ -1,0 +1,63 @@
+{
+  "formatVersion": 1,
+  "snapshotSha256": "fixture-postgresql-boundaries",
+  "schema": {
+    "checks": [
+      {
+        "id": "amount_min",
+        "table": "sample",
+        "expression": "amount >= 10",
+        "supported": true,
+        "operator": ">=",
+        "left": {"kind": "column", "table": "sample", "column": "amount", "type": "IntDataType"},
+        "right": {"kind": "constant", "value": "10", "type": "NumericValue"}
+      }
+    ]
+  },
+  "tests": [
+    {
+      "id": "T1",
+      "expectedResult": false,
+      "coveredRequirementIds": ["R_NEG"],
+      "state": [{"table": "parent", "values": {"id": "1"}}],
+      "data": [{"table": "sample", "values": {"id": "1", "parent_id": "1", "code": "1", "amount": "9", "ceiling": "50", "floor": "1"}}],
+      "stateSql": ["INSERT INTO parent (id) VALUES (1);"],
+      "dataSql": ["INSERT INTO sample (id, parent_id, code, amount, ceiling, floor) VALUES (1, 1, 1, 9, 50, 1);"],
+      "stateInsertCount": 1,
+      "dataInsertCount": 1
+    },
+    {
+      "id": "T2",
+      "expectedResult": true,
+      "coveredRequirementIds": ["R_POS"],
+      "state": [{"table": "parent", "values": {"id": "1"}}],
+      "data": [{"table": "sample", "values": {"id": "2", "parent_id": "1", "code": "2", "amount": "10", "ceiling": "50", "floor": "1"}}],
+      "stateSql": ["INSERT INTO parent (id) VALUES (1);"],
+      "dataSql": ["INSERT INTO sample (id, parent_id, code, amount, ceiling, floor) VALUES (2, 1, 2, 10, 50, 1);"],
+      "stateInsertCount": 1,
+      "dataInsertCount": 1
+    },
+    {
+      "id": "T3",
+      "expectedResult": true,
+      "coveredRequirementIds": ["R_POS"],
+      "state": [{"table": "parent", "values": {"id": "1"}}],
+      "data": [{"table": "sample", "values": {"id": "3", "parent_id": "1", "code": "3", "amount": "11", "ceiling": "50", "floor": "1"}}],
+      "stateSql": ["INSERT INTO parent (id) VALUES (1);"],
+      "dataSql": ["INSERT INTO sample (id, parent_id, code, amount, ceiling, floor) VALUES (3, 1, 3, 11, 50, 1);"],
+      "stateInsertCount": 1,
+      "dataInsertCount": 1
+    },
+    {
+      "id": "T4",
+      "expectedResult": true,
+      "coveredRequirementIds": ["R_POS"],
+      "state": [{"table": "parent", "values": {"id": "1"}}],
+      "data": [{"table": "sample", "values": {"id": "4", "parent_id": "1", "code": "4", "amount": "30", "ceiling": "50", "floor": "1"}}],
+      "stateSql": ["INSERT INTO parent (id) VALUES (1);"],
+      "dataSql": ["INSERT INTO sample (id, parent_id, code, amount, ceiling, floor) VALUES (4, 1, 4, 30, 50, 1);"],
+      "stateInsertCount": 1,
+      "dataInsertCount": 1
+    }
+  ]
+}

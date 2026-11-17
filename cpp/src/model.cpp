@@ -61,6 +61,22 @@ Input parse_input(const Json& root) {
         Test test;
         test.id = test_json.at("id").as_string();
         test.expected_result = test_json.at("expectedResult").as_bool();
+        if (test_json.contains("postgresValidation")) {
+            const Json& validation = test_json.at("postgresValidation");
+            if (validation.contains("phase")) {
+                test.validation_phase = validation.at("phase").as_string();
+            }
+            if (validation.contains("actualResult") && !validation.at("actualResult").is_null()) {
+                test.validation_observed = true;
+                test.validation_actual_result = validation.at("actualResult").as_bool();
+            }
+            if (validation.contains("sqlstate")) {
+                test.validation_sqlstate = validation.at("sqlstate").as_string();
+            }
+            if (validation.contains("constraintName")) {
+                test.validation_constraint = validation.at("constraintName").as_string();
+            }
+        }
         for (const Json& requirement : test_json.at("coveredRequirementIds").as_array()) {
             test.requirement_ids.push_back(requirement.as_string());
         }

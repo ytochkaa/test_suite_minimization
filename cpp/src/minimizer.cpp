@@ -154,6 +154,7 @@ Json minimize(const Input& input, const Coverage& coverage) {
     report.emplace("boundariesAfter", strings(verified_boundaries));
     report.emplace("lostObligations", strings(lost));
     report.emplace("unsupportedChecks", Json(std::move(unsupported)));
+    report.emplace("unverifiedBoundaryTestIds", strings(coverage.unverified_boundary_tests));
     report.emplace("selectionNanoseconds", static_cast<long long>(elapsed));
     report.emplace("verified", true);
     return Json(std::move(report));

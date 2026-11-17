@@ -713,8 +713,8 @@ Software Testing, Verification and Validation. <a name="eleven"></a>
 После этого редуктор пытается оставить меньше тестов, сохранив покрытие требований.
 
 На диаграмме показаны основные классы. Из готовых редукторов для примера выбран
-Additional Greedy. Классы с пометкой `planned` пока только предлагаются для
-курсовой: их названия и методы ещё могут измениться.
+Additional Greedy. Диаграмма показывает модель SchemaAnalyst; добавленные
+Java/C++-компоненты описаны после неё и в `docs/IMPLEMENTATION_STATUS.md`.
 
 ```mermaid
 classDiagram
@@ -759,19 +759,6 @@ class Reduction {
 class AdditionalGreedyReduction {
 +reduceTestSuite() boolean
 }
-class BoundaryCoverageMatrix {
-<<planned>>
-+build(schema, suite, requirements)
-}
-class BoundaryAwareReducer {
-<<planned>>
-+reduce(suite, matrix) TestSuite
-}
-class BoundaryCoverageVerifier {
-<<planned>>
-+verify(schema, original, reduced, requirements) boolean
-}
-
 CoverageCriterion ..> TestRequirements 
 TestRequirements "0.." o-- "0.." TestRequirement
 TestSuiteGenerator --> Schema
@@ -784,14 +771,6 @@ Reduction <|-- AdditionalGreedyReduction
 Reduction --> Schema
 Reduction --> TestRequirements
 Reduction --> TestSuite
-BoundaryCoverageMatrix ..> Schema
-BoundaryCoverageMatrix ..> TestRequirements
-BoundaryCoverageMatrix ..> TestSuite
-BoundaryAwareReducer ..> BoundaryCoverageMatrix
-BoundaryAwareReducer ..> TestSuite
-BoundaryCoverageVerifier ..> Schema
-BoundaryCoverageVerifier ..> TestSuite
-BoundaryCoverageVerifier ..> TestRequirements
 ```
 
 Пунктирная стрелка означает использование другого класса, сплошная — связь,
@@ -814,9 +793,11 @@ BoundaryCoverageVerifier ..> TestRequirements
 | `ReductionFactory` | В методе `reduceTestSuite(...)` выбирает редуктор по имени, запускает его и проверку покрытия, затем возвращает сокращённый набор. |
 | `Reduction` | Содержит общие действия редукторов. `contextTableCreator()` определяет, какие требования покрывает каждый тест, и дополняет их описания. `checkCoverage()` проверяет покрытие по правилам текущей реализации, включая сравнение описаний и условий. `getReducedTestSuite()` собирает выбранные тесты. |
 | `AdditionalGreedyReduction` | Наследует общие действия от `Reduction`. В `reduceTestSuite()` выбирает тест с наибольшим числом ещё не покрытых требований. После выбора пересчитывает, сколько новых требований могут покрыть остальные тесты. |
-| `BoundaryCoverageMatrix` — планируется | Метод `build(...)` должен составить таблицу: какой тест покрывает какие требования и границы. После построения эта таблица не должна меняться при сокращении. |
-| `BoundaryAwareReducer` — планируется | Метод `reduce(...)` должен выбирать целые тесты по таблице покрытия и сохранять найденные в исходном наборе границы. Новые данные на этом этапе не генерируются. |
-| `BoundaryCoverageVerifier` — планируется | Метод `verify(...)` должен заново проверить требования и границы по данным исходного и сокращённого наборов. Он не должен считать перенесённые описания требований доказательством покрытия. |
+| `minimizer::Input`, `Test`, `Check` | Типы в `cpp/include/minimizer/model.hpp`; `parse_input()` читает сериализованные требования, строки тестов и описание CHECK. |
+| `minimizer::Coverage`, `build_coverage()` | Тип и функция в `cpp/include/minimizer/boundary.hpp` и `cpp/src/boundary.cpp`; строят подтверждённое покрытие требований/границ и отмечают неподтверждённые кандидаты. |
+| `minimizer::minimize()` | Функция в `cpp/src/minimizer.cpp`; выполняет детерминированный отбор и проверяет сохранение обязанностей относительно построенной матрицы. |
+| Java snapshot/export/reducer wrappers | `GenerateBaselineSnapshot`, `ExportBaselineJson` и `RunSnapshotReducer` сохраняют один вход и отдельно перечитывают его для каждого штатного метода. |
+| PostgreSQL evidence | `experiments/validate_postgres.ps1` сохраняет результат, фазу, SQLSTATE и имя ограничения; только целевой `23514` подтверждает отрицательное свидетельство CHECK. |
 
 ### Зачем учитывать границы отдельно
 

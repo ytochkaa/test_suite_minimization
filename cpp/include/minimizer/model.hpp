@@ -36,6 +36,11 @@ struct Row {
 struct Test {
     std::string id;
     bool expected_result = false;
+    bool validation_observed = false;
+    bool validation_actual_result = false;
+    std::string validation_phase;
+    std::string validation_sqlstate;
+    std::string validation_constraint;
     std::vector<std::string> requirement_ids;
     std::vector<Row> state;
     std::vector<Row> data;

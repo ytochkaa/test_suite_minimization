@@ -80,6 +80,16 @@ std::optional<std::string> boundary_for(const Check& check, const Row& row) {
     return "B|" + check.id + "|" + category + "|" + truth(check.op, left_number, right_number);
 }
 
+bool validation_confirms_check(const Test& test, const Check& check) {
+    if (!test.validation_observed
+            || test.validation_phase != "data"
+            || test.validation_actual_result != test.expected_result) {
+        return false;
+    }
+    if (test.expected_result) return true;
+    return test.validation_sqlstate == "23514" && test.validation_constraint == check.id;
+}
+
 }  // namespace
 
 Coverage build_coverage(const Input& input) {
@@ -103,9 +113,12 @@ Coverage build_coverage(const Input& input) {
             for (const Check& check : input.checks) {
                 if (!check.supported) continue;
                 auto obligation = boundary_for(check, row);
-                if (obligation) {
+                if (!obligation) continue;
+                if (validation_confirms_check(test, check)) {
                     test_coverage.insert(*obligation);
                     coverage.boundaries.insert(*obligation);
+                } else {
+                    coverage.unverified_boundary_tests.insert(test.id);
                 }
             }
         }

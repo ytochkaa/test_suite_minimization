@@ -30,13 +30,21 @@ const char* basic_fixture() {
          "right":{"kind":"constant","value":"10","type":"NumericValue"}}
       ]},
       "tests":[
-        {"id":"T1","expectedResult":false,"coveredRequirementIds":["R_NEG"],"state":[],
+        {"id":"T1","expectedResult":false,
+         "postgresValidation":{"phase":"data","actualResult":false,"sqlstate":"23514","constraintName":"amount_min"},
+         "coveredRequirementIds":["R_NEG"],"state":[],
          "data":[{"table":"sample","values":{"amount":"9"}}],"stateInsertCount":0,"dataInsertCount":1},
-        {"id":"T2","expectedResult":true,"coveredRequirementIds":["R_POS"],"state":[],
+        {"id":"T2","expectedResult":true,
+         "postgresValidation":{"phase":"data","actualResult":true,"sqlstate":"","constraintName":""},
+         "coveredRequirementIds":["R_POS"],"state":[],
          "data":[{"table":"sample","values":{"amount":"10"}}],"stateInsertCount":0,"dataInsertCount":1},
-        {"id":"T3","expectedResult":true,"coveredRequirementIds":["R_POS"],"state":[],
+        {"id":"T3","expectedResult":true,
+         "postgresValidation":{"phase":"data","actualResult":true,"sqlstate":"","constraintName":""},
+         "coveredRequirementIds":["R_POS"],"state":[],
          "data":[{"table":"sample","values":{"amount":"11"}}],"stateInsertCount":0,"dataInsertCount":1},
-        {"id":"T4","expectedResult":true,"coveredRequirementIds":["R_POS"],"state":[],
+        {"id":"T4","expectedResult":true,
+         "postgresValidation":{"phase":"data","actualResult":true,"sqlstate":"","constraintName":""},
+         "coveredRequirementIds":["R_POS"],"state":[],
          "data":[{"table":"sample","values":{"amount":"30"}}],"stateInsertCount":3,"dataInsertCount":1}
       ]
     })JSON";
@@ -64,8 +72,10 @@ void test_null_and_bigint() {
       ]},
       "tests":[
         {"id":"T1","expectedResult":true,"coveredRequirementIds":["R1"],"state":[],
+         "postgresValidation":{"phase":"data","actualResult":true,"sqlstate":"","constraintName":""},
          "data":[{"table":"sample","values":{"x":null,"y":"1"}}],"stateInsertCount":0,"dataInsertCount":1},
         {"id":"T2","expectedResult":true,"coveredRequirementIds":["R1"],"state":[],
+         "postgresValidation":{"phase":"data","actualResult":true,"sqlstate":"","constraintName":""},
          "data":[{"table":"sample","values":{"x":"9223372036854775807","y":"-9223372036854775808"}}],
          "stateInsertCount":0,"dataInsertCount":1}
       ]})JSON";
@@ -75,6 +85,30 @@ void test_null_and_bigint() {
     require(coverage.boundaries.size() == 1, "wide non-neighbour distance must not become a boundary");
     minimizer::Json report = minimizer::minimize(input, coverage);
     require(report.at("selectedTestCount").as_number() == 1, "unique NULL witness is sufficient");
+}
+
+void test_foreign_key_failure_does_not_count_as_check_boundary() {
+    const std::string fixture = R"JSON({
+      "formatVersion":1,"snapshotSha256":"fixture-masked-boundary",
+      "schema":{"checks":[
+        {"id":"amount_min","table":"sample","expression":"amount >= 10","supported":true,"operator":">=",
+         "left":{"kind":"column","table":"sample","column":"amount","type":"IntDataType"},
+         "right":{"kind":"constant","value":"10","type":"NumericValue"}}
+      ]},
+      "tests":[
+        {"id":"T1","expectedResult":false,
+         "postgresValidation":{"phase":"data","actualResult":false,"sqlstate":"23503","constraintName":"sample_parent_id_fkey"},
+         "coveredRequirementIds":["R_NEG"],"state":[],
+         "data":[{"table":"sample","values":{"amount":"9"}}],"stateInsertCount":0,"dataInsertCount":1}
+      ]})JSON";
+    minimizer::Input input = minimizer::parse_input(minimizer::Json::parse(fixture));
+    minimizer::Coverage coverage = minimizer::build_coverage(input);
+    require(coverage.boundaries.empty(), "foreign-key rejection must not prove CHECK boundary coverage");
+    require(coverage.unverified_boundary_tests.count("T1") == 1,
+            "masked boundary candidate must be reported as unverified");
+    minimizer::Json report = minimizer::minimize(input, coverage);
+    require(report.at("unverifiedBoundaryTestIds").as_array().size() == 1,
+            "report must expose the unverified candidate");
 }
 
 void test_unsupported_check() {
@@ -115,6 +149,7 @@ int main() {
     try {
         test_boundary_preservation();
         test_null_and_bigint();
+        test_foreign_key_failure_does_not_count_as_check_boundary();
         test_unsupported_check();
         test_duplicate_id_rejected();
         std::cout << "All minimizer tests passed\n";
