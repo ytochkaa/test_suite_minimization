@@ -1,35 +1,21 @@
-# Статус исходного Java-эксперимента
+# Статус запуска Java-эксперимента
 
-Дата: 17.11.2026.
+Дата последнего запуска: 18.11.2026.
 
-Новые классы `CourseworkSchema`, `BaselineSnapshot` и `GenerateBaselineSnapshot` успешно скомпилированы `javac 1.8.0_512` с classpath ранее собранного SchemaAnalyst.
+Новая предметная `CourseworkSchema` успешно скомпилирована вместе с Java-обвязками. Полная матрица `run_matrix.ps1` завершилась с кодом `0` и обработала четыре генератора, seed `0`, шесть штатных методов и `boundaryAware`.
 
-Первый запуск через Java debugger остановился до main:
-
-```text
-Gradle build failed with exit code 1.
-```
-
-Диагностика Java Language Server:
+Проверенный снимок `avsDefaults-0.ser` создан из схемы с девятью таблицами:
 
 ```text
-Missing mandatory Classpath entries. Resolve Project Problems.
-GenerateBaselineSnapshot.java is a non-project file, only syntax errors are reported.
+sha256=1a9f8393d85e3b941d66cc26309ad34b014dd644a1d57abfbfb1bd25e9e02f36
+generator=avsDefaults
+criterion=CondAICC
+seed=0
+budget=10000
+tests=54
+requirements_covered=54
 ```
 
-После явной компиляции был выполнен запуск с `skipBuild=true` и полным classpath. Инструмент вернул:
+Фактические JSON, CSV и журналы полной матрицы сохранены на машине запуска в `results/matrix-20261118-031008-81981e91`. Отобранный реальный пример включён в `example-data/avsDefaults-seed0`.
 
-```text
-Debug session not yet detected for
-org.schemaanalyst.minimization.GenerateBaselineSnapshot after 120 seconds.
-Startup is unconfirmed, not necessarily failed.
-```
-
-Активная debug-сессия не обнаружена, файл снимка не создан. В списке процессов найден Gradle 4.10.2 daemon, запущенный на Oracle JDK 27:
-
-```text
-oracleJdk-27\bin\java.exe ...
-org.gradle.launcher.daemon.bootstrap.GradleDaemon 4.10.2
-```
-
-Таким образом, воспроизводимый Java-запуск пока блокируется конфигурацией Java/Gradle в VS Code. Отсутствие снимка не считается нулевым результатом генерации.
+Среда: Eclipse Temurin JDK 8u512-b09, Gradle wrapper 4.10.2, PostgreSQL 18.7, PowerShell 5.1.26100.9818. В успешной матрице все результаты выполнения SQL в PostgreSQL совпали с ожиданиями; потери покрытий некоторых штатных редукторов перечислены в `../../docs/RESULTS_BASELINE.md`.

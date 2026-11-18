@@ -13,7 +13,7 @@
 | C++ unit/regression test | `test_suite_minimization\cpp\tests\test_minimizer.cpp` |
 | Регистрация C++ теста в CTest | `test_suite_minimization\cpp\CMakeLists.txt` |
 | JSON fixture для проверки PostgreSQL | `test_suite_minimization\experiments\fixtures\postgres-boundaries.json` |
-| Ручной SQL NULL oracle | `..\schemaanalyst_experiments\manual_null_oracle.sql` |
+| Ручной SQL NULL oracle | `test_suite_minimization\experiments\example-data\avsDefaults-seed0\postgres\manual_null_oracle.sql` |
 
 В VS Code откройте корень репозитория. Java-тесты можно просматривать в Explorer по пути выше; если установлен **Test Runner for Java**, они также появятся в панели **Testing**. Для C++ после конфигурации откройте панель CMake/CTest или используйте `ctest -N`, чтобы вывести зарегистрированные тесты. CLI-команды ниже работают независимо от наличия расширений VS Code.
 
@@ -77,7 +77,7 @@ $psql = 'C:\Program Files\PostgreSQL\18\bin\psql.exe'
 - HTML-отчёт: `SchemaAnalyst\build\reports\tests\test\index.html`;
 - XML-результаты по классам: `SchemaAnalyst\build\test-results\test\TEST-*.xml`.
 
-Если нужно показать тесты в отчёте или на защите, откройте HTML-отчёт в браузере. В нём видны количество тестов, ошибки и stack trace. На проверенной конфигурации полный набор имел 1715 тестов и 15 известных ошибок: проблемы legacy JDBC с PostgreSQL SCRAM, NPE в части старых case-study tests и несовпадение ожидаемого количества мутантов. Поэтому не трактуйте `test` как полностью зелёный запуск; детали зафиксированы в [RESULTS_BASELINE.md](./RESULTS_BASELINE.md).
+Если нужно показать тесты в отчёте или на защите, откройте HTML-отчёт в браузере. В нём видны количество тестов, ошибки и stack trace. Полный Gradle-набор не запускался в текущей проверке новой предметной схемы; предыдущий запуск содержал известные проблемы legacy JDBC с PostgreSQL SCRAM, NPE в части старых case-study tests и несовпадение ожидаемого количества мутантов. Не считайте один только успешный `compile` прохождением полного unit-набора.
 
 ## Собрать и проверить C++ reducer
 
@@ -120,7 +120,7 @@ $exe = '.\test_suite_minimization\build\cpp\test_suite_minimization.exe'
   -ResultPath '.\test_suite_minimization\build\example-boundaryAware-postgres.csv'
 ```
 
-Первая команда должна показать 24 исходных теста, 24 требования и 8 подтверждённых границ; в отчёте ожидается 18 выбранных тестов. Вторая команда повторно выполняет выбранные тесты на вашей базе и создаёт CSV в `build`. Если PostgreSQL или его утилиты установлены не по пути из сценария, укажите `-Psql` и `-Createdb`.
+Первая команда должна показать 54 исходных теста, 54 требования и 5 подтверждённых границ; в отчёте ожидается 48 выбранных тестов. Вторая команда повторно выполняет выбранные тесты на вашей базе и создаёт CSV в `build`. Если PostgreSQL или его утилиты установлены не по пути из сценария, укажите `-Psql` и `-Createdb`.
 
 ## Выполнить ручной SQL oracle
 
@@ -129,10 +129,10 @@ $exe = '.\test_suite_minimization\build\cpp\test_suite_minimization.exe'
 ```powershell
 & 'C:\Program Files\PostgreSQL\18\bin\psql.exe' `
   -X -h 127.0.0.1 -p 55432 -U baseline -d coursework_validation `
-  -f ..\schemaanalyst_experiments\manual_null_oracle.sql
+  -f .\test_suite_minimization\experiments\example-data\avsDefaults-seed0\postgres\manual_null_oracle.sql
 ```
 
-Скрипт выводит семь комбинаций `x`, `y`, ожидаемого и фактического результата CHECK. Он выполняет только `SELECT` и не изменяет схему.
+Скрипт выводит десять комбинаций остатка и вместимости, ожидаемого и фактического результата CHECK. Он выполняет только `SELECT` и не изменяет схему.
 
 ## Запустить экспериментальную матрицу
 

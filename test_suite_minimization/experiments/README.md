@@ -4,7 +4,7 @@
 
 Минимальная конфигурация:
 
-- схема: `CourseworkSchema`;
+- схема: `CourseworkSchema` — сотрудники, лаборатории, пользователи, оборудование, автоматы, товары и три таблицы-связки;
 - СУБД-модель: Postgres;
 - критерий: CondAICC;
 - генераторы: `avsDefaults`, `randomDefaults`, `dominoRandom`, `dominoAVS`;
@@ -12,6 +12,8 @@
 - бюджет: 10000;
 - readability: false;
 - fullreduce: false.
+
+В `vending_machines_goods` остаток хранится в `quantity_of_goods`, а ограничение по вместимости — в `stock_capacity`. CHECK-ограничения проверяют неотрицательный остаток, положительную вместимость и условие `quantity_of_goods <= stock_capacity`. Они дают целочисленные примеры сравнений `x op c` и `x op y` для boundary-aware эксперимента.
 
 Реальный набор артефактов для `avsDefaults`, seed `0` приложен в
 [`example-data/avsDefaults-seed0`](example-data/avsDefaults-seed0). В папке есть

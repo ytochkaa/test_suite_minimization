@@ -33,7 +33,7 @@ SchemaAnalyst создаёт TestSuite ──► Java-снимок .ser
 
 ## 2.2. Термины на примере проекта
 
-- **Схема базы данных** описывает таблицы, столбцы и ограничения. Например, `CHECK (amount >= 10)` задаёт правило для значений столбца `amount`.
+- **Схема базы данных** описывает таблицы, столбцы и ограничения. Например, `CHECK (quantity_of_goods >= 0)` запрещает отрицательный остаток товара.
 - **Требование покрытия** — проверка, которую создаёт критерий SchemaAnalyst. Например, критерий может потребовать проверить успешный и неуспешный исход для условия.
 - **`TestCase`** — один тестовый случай: какое состояние подготовить, какие данные вставить и какой результат ожидается.
 - **`state`** — подготовительные строки. Например, строка родительской таблицы, на которую ссылается внешний ключ.
@@ -46,64 +46,77 @@ SchemaAnalyst создаёт TestSuite ──► Java-снимок .ser
 
 ## 2.3. Схема и тестовые данные
 
-Для эксперимента создана Java-схема [`CourseworkSchema.java`](../test_suite_minimization/src/main/java/org/schemaanalyst/minimization/CourseworkSchema.java). Её SQL-эквивалент для PostgreSQL находится в [`schema.sql`](../test_suite_minimization/experiments/schema.sql).
+Для эксперимента используется предметная схема лаборатории, оборудования и торговых автоматов. Java-описание находится в [`CourseworkSchema.java`](../test_suite_minimization/src/main/java/org/schemaanalyst/minimization/CourseworkSchema.java), а соответствующий DDL для PostgreSQL — в [`schema.sql`](../test_suite_minimization/experiments/schema.sql). Java- и SQL-описания задают одни и те же таблицы и ограничения.
 
-В приложенной папке нет бинарной копии работающей PostgreSQL-базы. `schema.sql` — это DDL для создания таблиц и ограничений; сами тестовые строки и их SQL-вставки находятся в JSON-файлах. Валидатор создаёт отдельное чистое состояние базы для каждого TestCase.
+В модели девять таблиц:
 
-В схеме две таблицы:
-
-| Таблица | Столбцы и ограничения |
+| Таблица | Назначение, ключи и основные поля |
 |---|---|
-| `parent` | `id INTEGER PRIMARY KEY` |
-| `sample` | `id` — первичный ключ; `parent_id` — внешний ключ на `parent.id`; `code` — UNIQUE; `amount` — NOT NULL; `ceiling` и `floor` допускают NULL |
+| `employees` | Сотрудники: `employee_id` — PK; должность, ФИО, паспортные сведения, СНИЛС, ИНН и даты. Паспортные номера, СНИЛС и ИНН хранятся как текст, чтобы не потерять формат и ведущие нули. |
+| `laboratories` | Лаборатории: `laboratory_id` — PK; спецификация. |
+| `employee_laboratories` | Связь сотрудника с лабораторией: составной PK `(employee_id, laboratory_id)`; оба поля — FK. Это таблица-связка `e_l` с диаграммы и позволяет сотруднику работать в нескольких лабораториях. |
+| `equipment` | Оборудование: `equipment_id` — PK; название, описание, сертификат; `laboratory_id` — FK на лабораторию. |
+| `users` | Пользователи: `user_id` — PK; СНИЛС и ФИО. В перечне полей указан СНИЛС; поле ИНН с картинки в эту таблицу не добавлено. |
+| `automatons_food` | Торговые автоматы: `vending_machine_id` — PK; модель и тип; `laboratory_id` — FK на лабораторию. |
+| `goods` | Товары: `product_id` — PK; название. |
+| `vending_machines_goods` | Ассортимент и остаток в автомате: составной PK `(vending_machine_id, goods_id)`; оба поля — FK; количество, вместимость и цена. |
+| `users_equipment` | Выдача оборудования пользователям: `user_id` и `equipment_id` — FK; время выдачи и возврата. Составной PK `(user_id, equipment_id, start_time)` позволяет хранить разные периоды выдачи одной пары. |
 
-Таблица `sample` содержит четыре CHECK:
+Связи на диаграмме отражены так: лаборатория связана с оборудованием и автоматами отношением «один ко многим»; сотрудники и лаборатории связаны «многие ко многим» через `employee_laboratories`; автоматы и товары — «многие ко многим» через `vending_machines_goods`; пользователи и оборудование — через `users_equipment`. Названия столбцов приведены к единому `snake_case`; `laboratory_number` с текстового списка нормализован до `laboratory_id`, как на диаграмме и в первичном ключе лаборатории.
 
-| CHECK | Пример формы | Значение для опыта |
+В `vending_machines_goods` добавлено согласованное для тестов поле `stock_capacity`: максимальное количество данного товара в конкретном автомате. Оно нужно для проверки осмысленного сравнения количества с другим целочисленным полем. Правила таблицы:
+
+| CHECK | Форма | Смысл |
 |---|---|---|
-| `amount_min`: `amount >= 10` | `x op c` | сравнение столбца с константой |
-| `amount_ceiling`: `amount <= ceiling` | `x op y` | сравнение двух столбцов |
-| `ceiling_max`: `ceiling < 100` | `x op c` | сравнение столбца с константой |
-| `floor_min`: `floor > 0` | `x op c` | сравнение столбца с константой |
+| `quantity_nonnegative`: `quantity_of_goods >= 0` | `x op c` | Остаток не может быть отрицательным. |
+| `stock_capacity_positive`: `stock_capacity > 0` | `x op c` | Вместимость должна быть положительной. |
+| `quantity_within_capacity`: `quantity_of_goods <= stock_capacity` | `x op y` | Остаток не должен превышать вместимость. |
 
-Подготовительная строка `parent` в `state` нужна, чтобы вставка `sample` с `parent_id = 1` не завершилась ошибкой внешнего ключа. Строка `sample` в `data` — собственно проверяемый тест. Перед каждым TestCase валидатор очищает схему `public` и загружает DDL заново, поэтому данные одного теста не влияют на следующий.
+Ограниченные значения `quantity_of_goods` и `stock_capacity` объявлены `NOT NULL`: в PostgreSQL CHECK с результатом `UNKNOWN` (например, из-за NULL) не отклоняет строку. Цена хранится как `NUMERIC(10,2)`, но не участвует в boundary-анализе: текущий прототип обрабатывает только целочисленные сравнения. Поля `passport_date` и `hire_date` имеют тип DATE, а периоды выдачи — TIMESTAMP.
+
+В приложенной папке нет бинарной копии работающей PostgreSQL-базы. `schema.sql` — это DDL для её создания; строки состояния и тестовые SQL-вставки находятся в JSON. Валидатор очищает схему `public` и создаёт её заново перед каждым TestCase, поэтому данные разных тестов не смешиваются. Использовать для валидации следует только отдельную тестовую базу.
 
 ### Пример одного теста
 
-Исходный Java-объект сохраняется в бинарный `.ser`-снимок. Java-экспортёр создаёт JSON, который можно читать как текст. Ниже — сокращённый иллюстративный пример одной записи из его массива `tests`; полный JSON также содержит параметры генерации, описание схемы, список требований и SHA-256 исходного снимка.
+Исходный Java-объект сохраняется в бинарный `.ser`-снимок. Java-экспортёр создаёт JSON, который можно читать как текст. Ниже приведён реальный TestCase `T45` из полного запуска `avsDefaults`, seed `0`. JSON также содержит параметры генерации, описание схемы, список требований и SHA-256 исходного снимка.
 
 ```json
 {
-  "id": "T2",
-  "sourceRequirementId": "R1",
-  "coveredRequirementIds": ["R1"],
+  "id": "T45",
+  "sourceRequirementId": "R45",
+  "coveredRequirementIds": ["R45", "R47", "R49", "R51", "R53"],
   "expectedResult": true,
   "state": [
-    {"table": "parent", "values": {"id": "1"}}
+    {"table": "automatons_food", "values": {"vending_machine_id": "0", "vending_machine_model": "''", "type_of_vending_machine": "''", "laboratory_id": "0"}},
+    {"table": "goods", "values": {"product_id": "0", "product_name": "''"}},
+    {"table": "laboratories", "values": {"laboratory_id": "0", "laboratory_specification": "''"}}
   ],
   "data": [
     {
-      "table": "sample",
+      "table": "vending_machines_goods",
       "values": {
-        "id": "2",
-        "parent_id": "1",
-        "code": "2",
-        "amount": "10",
-        "ceiling": "50",
-        "floor": "1"
+        "vending_machine_id": "0",
+        "goods_id": "0",
+        "quantity_of_goods": "0",
+        "stock_capacity": "1",
+        "price": "0"
       }
     }
   ],
-  "stateSql": ["INSERT INTO parent (id) VALUES (1);"],
-  "dataSql": [
-    "INSERT INTO sample (id, parent_id, code, amount, ceiling, floor) VALUES (2, 1, 2, 10, 50, 1);"
+  "stateSql": [
+    "INSERT INTO \"laboratories\"(\"laboratory_id\", \"laboratory_specification\") VALUES (0, '');",
+    "INSERT INTO \"automatons_food\"(\"vending_machine_id\", \"vending_machine_model\", \"type_of_vending_machine\", \"laboratory_id\") VALUES (0, '', '', 0);",
+    "INSERT INTO \"goods\"(\"product_id\", \"product_name\") VALUES (0, '');"
   ],
-  "stateInsertCount": 1,
+  "dataSql": [
+    "INSERT INTO \"vending_machines_goods\"(\"vending_machine_id\", \"goods_id\", \"quantity_of_goods\", \"stock_capacity\", \"price\") VALUES (0, 0, 0, 1, 0);"
+  ],
+  "stateInsertCount": 3,
   "dataInsertCount": 1
 }
 ```
 
-Сначала вставляется `parent(id=1)`, затем строка `sample`. Значения удовлетворяют внешнему ключу, уникальности, `NOT NULL` и всем четырём CHECK, поэтому в примере ожидается успешная вставка. Это пример структуры записи, а не утверждение, что именно этот TestCase входил в базовый запуск.
+Сначала в `state` создаются лаборатория, автомат и товар, на которые ссылается строка в `data`. Для `T45` остаток равен нулю, вместимость равна единице, и вставка проходит все три CHECK. Это фрагмент реального экспорта; полный TestCase и его проверка сохранены в приложенной папке примера.
 
 ## 2.4. Какие границы сохраняет прототип
 
@@ -112,7 +125,7 @@ SchemaAnalyst создаёт TestSuite ──► Java-снимок .ser
 - для `x op c`: `d = x - c`;
 - для `x op y`: `d = x - y`.
 
-Наблюдаемыми числовыми категориями считаются `d = -1`, `d = 0` и `d = +1`: значение непосредственно до границы, на границе и после неё. Ключ в C++-отчёте включает ограничение, разность и результат сравнения, например `B|amount_min|0|true`. Значение истины зависит от оператора: для `x >= c` категории `-1`, `0`, `+1` дают `FALSE`, `TRUE`, `TRUE`; для `x < c` — `TRUE`, `FALSE`, `FALSE`.
+Наблюдаемыми числовыми категориями считаются `d = -1`, `d = 0` и `d = +1`: значение непосредственно до границы, на границе и после неё. Ключ в C++-отчёте включает ограничение, разность и результат сравнения, например `B|quantity_nonnegative|0|true`. Значение истины зависит от оператора: для `x >= c` категории `-1`, `0`, `+1` дают `FALSE`, `TRUE`, `TRUE`; для `x < c` — `TRUE`, `FALSE`, `FALSE`.
 
 Если операнд равен NULL, числовая разность не вычисляется. Прототип записывает отдельные категории `left-null`, `right-null` и `both-null` с результатом `unknown`. Это отдельные наблюдения SQL NULL, а не позиции −1, 0 или +1.
 
@@ -142,10 +155,10 @@ SchemaAnalyst создаёт TestSuite ──► Java-снимок .ser
 | 5. Выбранный набор | [`output/avsDefaults-0-boundaryAware.json`](../test_suite_minimization/experiments/example-data/avsDefaults-seed0/output/avsDefaults-0-boundaryAware.json) | Сценарий `run_matrix.ps1` берёт ID из отчёта C++ и формирует JSON только с выбранными тестами. Этот файл затем проверяется PostgreSQL. |
 | 6. Проверка выхода | [`output/avsDefaults-0-boundaryAware-validated.json`](../test_suite_minimization/experiments/example-data/avsDefaults-seed0/output/avsDefaults-0-boundaryAware-validated.json), [`output/avsDefaults-0-boundaryAware-verify.json`](../test_suite_minimization/experiments/example-data/avsDefaults-seed0/output/avsDefaults-0-boundaryAware-verify.json) | Первый содержит PostgreSQL evidence для выбранных тестов; второй — повторный отчёт покрытия после сокращения. |
 | 7. Фактический результат БД | [`postgres/avsDefaults-0-full-postgres.csv`](../test_suite_minimization/experiments/example-data/avsDefaults-seed0/postgres/avsDefaults-0-full-postgres.csv), [`postgres/avsDefaults-0-boundaryAware-postgres.csv`](../test_suite_minimization/experiments/example-data/avsDefaults-seed0/postgres/avsDefaults-0-boundaryAware-postgres.csv) | По одной строке на TestCase: ожидаемый/фактический исход, фаза, SQLSTATE и сообщение об ошибке. |
-| 8. Схема БД и NULL oracle | [`postgres/schema.sql`](../test_suite_minimization/experiments/example-data/avsDefaults-seed0/postgres/schema.sql), [`postgres/manual_null_oracle.sql`](../test_suite_minimization/experiments/example-data/avsDefaults-seed0/postgres/manual_null_oracle.sql) | DDL таблиц эксперимента и отдельный SELECT для семи случаев с NULL. |
+| 8. Схема БД и NULL oracle | [`postgres/schema.sql`](../test_suite_minimization/experiments/example-data/avsDefaults-seed0/postgres/schema.sql), [`postgres/manual_null_oracle.sql`](../test_suite_minimization/experiments/example-data/avsDefaults-seed0/postgres/manual_null_oracle.sql) | DDL девяти таблиц и отдельный SELECT для десяти случаев с NULL и граничными числами. |
 | 9. Среда и полная сводка | [`environment/`](../test_suite_minimization/experiments/example-data/avsDefaults-seed0/environment/), [`summary/summary.csv`](../test_suite_minimization/experiments/example-data/avsDefaults-seed0/summary/summary.csv) | Версии ПО, параметры генерации и строки исходной матрицы по всем генераторам/редукторам. Абсолютные пути внутри CSV относятся к машине исходного запуска. |
 
-SHA-256 файла `.ser` равен `dfa813b78e7a0ddc98d0e24220f2abbc8aa74f77d443cff69b69a074a7cbacb5`. Такое же значение записано в JSON-снимках: оно позволяет убедиться, что сравниваемые редукторы получили один исходный набор.
+SHA-256 файла `.ser` равен `1a9f8393d85e3b941d66cc26309ad34b014dd644a1d57abfbfb1bd25e9e02f36`. Такое же значение записано в JSON-снимках: оно позволяет убедиться, что сравниваемые редукторы получили один исходный набор.
 
 ## 2.6. Как работает сокращение
 
@@ -169,18 +182,18 @@ SHA-256 файла `.ser` равен `dfa813b78e7a0ddc98d0e24220f2abbc8aa74f77d4
 
 ## 2.7. Результат реального примера
 
-Запуск выполнен 17.11.2026 на Windows, с `CondAICC`, `avsDefaults`, seed `0` и бюджетом `10000`. Полная таблица измерений находится в [`RESULTS_BASELINE.md`](./RESULTS_BASELINE.md); ниже приведена одна строка для приложенного примера.
+Запуск выполнен 18.11.2026 на Windows, с `CondAICC`, `avsDefaults`, seed `0` и бюджетом `10000`. Полная таблица измерений находится в [`RESULTS_BASELINE.md`](./RESULTS_BASELINE.md); ниже приведены данные для приложенного реального примера.
 
 | Метрика | Исходный набор | После `boundaryAware` |
 |---|---:|---:|
-| `TestCase` | 24 | 18 |
-| `state` INSERT | 30 | 23 |
-| `data` INSERT | 24 | 18 |
-| Требования SchemaAnalyst | 24 | 24 |
-| Подтверждённые граничные наблюдения | 8 | 8 |
-| PostgreSQL: тестов с ожидаемым фактом | 24/24 | 18/18 |
+| `TestCase` | 54 | 48 |
+| `state` INSERT | 122 | 105 |
+| `data` INSERT | 66 | 60 |
+| Требования SchemaAnalyst | 54 | 54 |
+| Подтверждённые граничные наблюдения | 5 | 5 |
+| PostgreSQL: тестов с ожидаемым фактом | 54/54 | 48/48 |
 
-Генерация заняла `144.6654 ms`, отбор — `0.7494 ms`. Время не включает запуск JVM и PostgreSQL-валидацию. Итоговый статус — `PASS_WITH_UNVERIFIED_CANDIDATES`: все требования, 8 исходных границ и 18 PostgreSQL-результатов подтверждены, но у 9 тестов полного набора были кандидаты границ, не подтверждённые целевым CHECK. Эти кандидаты не засчитывались как границы.
+Генерация заняла `147.6211 ms`, отбор — `2.7042 ms`. Время не включает запуск JVM и PostgreSQL-валидацию. Итоговый статус — `PASS_WITH_UNVERIFIED_CANDIDATES`: все требования, 5 исходных границ и 48 PostgreSQL-результатов подтверждены, но у 9 тестов полного набора были кандидаты границ, не подтверждённые целевым CHECK. Эти кандидаты не засчитывались как границы.
 
 Это результат одного seed и одной схемы, а не статистическое доказательство превосходства редуктора. В полном прогоне использованы четыре генератора и шесть штатных методов; подробные потери требований и границ по каждой комбинации приведены в baseline-отчёте.
 
@@ -203,7 +216,7 @@ SHA-256 файла `.ser` равен `dfa813b78e7a0ddc98d0e24220f2abbc8aa74f77d4
 .\SchemaAnalyst\gradlew.bat -p .\SchemaAnalyst compile --offline --no-daemon
 ```
 
-Если нужных Gradle-зависимостей нет в локальном кеше, повторите без `--offline`. Полный `test` SchemaAnalyst — отдельный шаг: на проверенной среде он завершился с 15 известными ошибками из 1715 тестов; причины перечислены в `RESULTS_BASELINE.md`. Эти старые тесты не являются PostgreSQL-проверкой приложенного примера.
+Если нужных Gradle-зависимостей нет в локальном кеше, повторите без `--offline`. Полный `test` SchemaAnalyst — отдельный шаг и в этой проверке не запускался; предыдущий полный прогон содержал известные проблемы в старых unit-тестах. Успешный `compile` и PostgreSQL-матрица не означают, что весь unit-набор прошёл.
 
 Собрать C++ и выполнить его CTest:
 
@@ -239,7 +252,7 @@ $exe = '.\test_suite_minimization\build\cpp\test_suite_minimization.exe'
   '.\test_suite_minimization\build\cpp\example-full-report.json'
 ```
 
-В отчёте должны быть 24 исходных теста, 24 требования и 8 подтверждённых границ; `selectedTestCount` должен быть равен 18. C++-программа пишет выбранные ID в отчёт, но не формирует JSON сокращённого набора: приложенный `output/avsDefaults-0-boundaryAware.json` создан оркестратором `run_matrix.ps1` по этим ID.
+В отчёте должны быть 54 исходных теста, 54 требования и 5 подтверждённых границ; `selectedTestCount` должен быть равен 48. C++-программа пишет выбранные ID в отчёт, но не формирует JSON сокращённого набора: приложенный `output/avsDefaults-0-boundaryAware.json` создан оркестратором `run_matrix.ps1` по этим ID.
 
 Проверить выбранный набор в своей тестовой базе:
 
@@ -260,7 +273,7 @@ $exe = '.\test_suite_minimization\build\cpp\test_suite_minimization.exe'
   -f '.\test_suite_minimization\experiments\example-data\avsDefaults-seed0\postgres\manual_null_oracle.sql'
 ```
 
-Ожидается семь строк, в которых `actual_accept` совпадает с `expected_accept`.
+Ожидается десять строк, в которых `actual_accept` совпадает с `expected_accept`. Запрос отдельно показывает, как SQL CHECK оценивает комбинации чисел и NULL; `NOT NULL` проверяется вставками в саму таблицу.
 
 ### 2.8.4. Сгенерировать новую матрицу целиком
 
