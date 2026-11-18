@@ -158,6 +158,8 @@ SchemaAnalyst создаёт TestSuite ──► Java-снимок .ser
 
 [`test_suite_minimization/experiments/example-data/avsDefaults-seed0/`](../test_suite_minimization/experiments/example-data/avsDefaults-seed0/)
 
+Для пошагового просмотра входов SchemaAnalyst, исходного набора, собственного алгоритма и сравнительных результатов создана отдельная [папка `test`](../test/). В ней те же артефакты разложены по четырём этапам; `simpleGreedy` представляет штатный алгоритм SchemaAnalyst, а `boundaryAware` — собственный C++-алгоритм.
+
 | Шаг | Файл из папки | Кто создал и для чего он нужен |
 |---|---|---|
 | 1. Исходный набор | [`source/avsDefaults-0.ser`](../test_suite_minimization/experiments/example-data/avsDefaults-seed0/source/avsDefaults-0.ser) | Обвязка `GenerateBaselineSnapshot` запускает генерацию SchemaAnalyst и сериализует объекты схемы, требований и `TestSuite`. Это бинарный файл, не SQL и не JSON. |

@@ -1,0 +1,9 @@
+{
+  "criterion": "CondAICC",
+  "generator": "avsDefaults",
+  "seed": 0,
+  "budget": 10000,
+  "schemaClass": "CourseworkSchema",
+  "postgresSchema": "schema.sql",
+  "sourceSnapshotSha256": "1a9f8393d85e3b941d66cc26309ad34b014dd644a1d57abfbfb1bd25e9e02f36"
+}

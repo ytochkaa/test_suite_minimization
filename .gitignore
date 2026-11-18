@@ -17,6 +17,7 @@ generatedtest
 /test_suite_minimization/experiments/results/
 *.ser
 !/test_suite_minimization/experiments/example-data/avsDefaults-seed0/source/avsDefaults-0.ser
+!/test/02_Набор_тестов_SchemaAnalyst/source/avsDefaults-0.ser
 /bin/
 /SchemaAnalyst/bin/
 !/SchemaAnalyst/src/deprecated/report/
