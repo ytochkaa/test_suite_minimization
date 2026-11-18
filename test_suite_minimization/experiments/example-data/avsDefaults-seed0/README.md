@@ -17,7 +17,7 @@
 |---|---|---|
 | Генерация SchemaAnalyst | [`source/avsDefaults-0.ser`](source/avsDefaults-0.ser) | Сериализованный Java `TestSuite` со схемой, требованиями и тестами. |
 | Экспорт Java | [`input/avsDefaults-0-full.json`](input/avsDefaults-0-full.json) | Исходный набор, описание схемы и требований, строки `state`/`data` и SQL. |
-| PostgreSQL evidence | [`input/avsDefaults-0-full-validated.json`](input/avsDefaults-0-full-validated.json) | Java JSON с фактическим результатом выполнения каждого полного теста. Это вход C++-редуктора. |
+| PostgreSQL evidence | [`input/avsDefaults-0-full-validated.json`](input/avsDefaults-0-full-validated.json) | Java JSON с фактическим результатом выполнения каждого полного теста. Это вход C++-алгоритма сокращения тестового набора. |
 | Анализ исходного набора | [`output/avsDefaults-0-full-boundary-report.json`](output/avsDefaults-0-full-boundary-report.json) | Отчёт C++ с множествами покрытий, выбранными ID и объяснениями выбора. |
 | Набор после отбора | [`output/avsDefaults-0-boundaryAware.json`](output/avsDefaults-0-boundaryAware.json) | JSON выбранных тестов; формируется оркестратором `run_matrix.ps1` по ID из отчёта C++. |
 | Проверенный результат | [`output/avsDefaults-0-boundaryAware-validated.json`](output/avsDefaults-0-boundaryAware-validated.json), [`output/avsDefaults-0-boundaryAware-verify.json`](output/avsDefaults-0-boundaryAware-verify.json) | PostgreSQL evidence для выбранных тестов и повторная проверка покрытия. |

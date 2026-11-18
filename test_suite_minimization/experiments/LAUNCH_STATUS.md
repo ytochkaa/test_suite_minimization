@@ -18,4 +18,4 @@ requirements_covered=54
 
 Фактические JSON, CSV и журналы полной матрицы сохранены на машине запуска в `results/matrix-20261118-031008-81981e91`. Отобранный реальный пример включён в `example-data/avsDefaults-seed0`.
 
-Среда: Eclipse Temurin JDK 8u512-b09, Gradle wrapper 4.10.2, PostgreSQL 18.7, PowerShell 5.1.26100.9818. В успешной матрице все результаты выполнения SQL в PostgreSQL совпали с ожиданиями; потери покрытий некоторых штатных редукторов перечислены в `../../docs/RESULTS_BASELINE.md`.
+Среда: Eclipse Temurin JDK 8u512-b09, Gradle wrapper 4.10.2, PostgreSQL 18.7, PowerShell 5.1.26100.9818. В успешной матрице все результаты выполнения SQL в PostgreSQL совпали с ожиданиями; потери покрытий некоторых штатных алгоритмов сокращения перечислены в `../../docs/RESULTS_BASELINE.md`.

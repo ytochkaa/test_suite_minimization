@@ -14,8 +14,8 @@
 └── README.md                      # это описание структуры
 ```
 
-SchemaAnalyst содержит генерацию тестовых данных и штатные редукторы.
-`test_suite_minimization` добавляет Java-обвязку экспериментов, C++-редуктор и
+SchemaAnalyst содержит генерацию тестовых данных и штатные алгоритмы сокращения тестового набора.
+`test_suite_minimization` добавляет Java-обвязку экспериментов, C++-алгоритм сокращения тестового набора и
 проверку PostgreSQL. Документы и отчёты находятся отдельно в `docs/`.
 
 ## `SchemaAnalyst/`
@@ -24,7 +24,7 @@ SchemaAnalyst содержит генерацию тестовых данных 
 
 | Путь | Назначение |
 |---|---|
-| `SchemaAnalyst/src/main/java` | Основной Java-код SchemaAnalyst: модель схемы, генераторы, критерии покрытия и редукторы. |
+| `SchemaAnalyst/src/main/java` | Основной Java-код SchemaAnalyst: модель схемы, генераторы, критерии покрытия и штатные алгоритмы сокращения тестового набора. |
 | `SchemaAnalyst/src/test/java` | Java unit- и integration-тесты; агрегатор — `org.schemaanalyst.unittest.AllTests`. |
 | `SchemaAnalyst/src/paper` | Материалы, связанные с публикациями и исследовательской частью исходного проекта. |
 | `SchemaAnalyst/casestudies` | SQL-схемы и исходные данные примеров для генерации и экспериментов. |
@@ -92,9 +92,9 @@ SchemaAnalyst содержит генерацию тестовых данных 
 
 ## `test_suite_minimization/`
 
-Практическая часть сравнивает штатные редукторы и проверяет отдельное
+Практическая часть сравнивает штатные алгоритмы сокращения тестового набора и проверяет отдельное
 сохранение требований SchemaAnalyst и наблюдаемых границ для сравнений `x op c`
-и `x op y`. Каждый редуктор получает независимую копию исходного набора.
+и `x op y`. Каждый алгоритм запускается на независимой копии исходного набора.
 
 ### Java-обвязка (`test_suite_minimization/src`)
 
@@ -105,13 +105,13 @@ SchemaAnalyst содержит генерацию тестовых данных 
 | `GenerateBaselineSnapshot.java` | Однократная генерация и сохранение исходного набора в `.ser`. |
 | `ExportBaselineJson.java` | Экспорт сохранённого снимка в JSON. |
 | `SnapshotJsonExporter.java` | Формирование JSON со схемой, требованиями, тестами и SQL. |
-| `RunSnapshotReducer.java` | Независимый запуск выбранного штатного редуктора на снимке. |
+| `RunSnapshotReducer.java` | Независимый запуск выбранного штатного алгоритма сокращения на снимке. |
 | `JsonUtil.java` | Запись JSON без дополнительной Java-зависимости. |
 
 Сборка Gradle проекта SchemaAnalyst подключает эти исходники; отдельная копия
 Java-зависимостей не создаётся.
 
-### C++ редуктор (`test_suite_minimization/cpp`)
+### C++-алгоритм сокращения тестового набора (`test_suite_minimization/cpp`)
 
 | Файл | Назначение |
 |---|---|
@@ -126,20 +126,20 @@ Java-зависимостей не создаётся.
 | `src/main.cpp` | Точка входа C++-программы. |
 | `src/minimizer.cpp` | Детерминированный выбор поднабора тестов. |
 | `src/model.cpp` | Разбор входной модели и PostgreSQL evidence. |
-| `tests/test_minimizer.cpp` | Unit- и regression-тесты редуктора. |
+| `tests/test_minimizer.cpp` | Unit- и regression-тесты C++-алгоритма сокращения тестового набора. |
 
 ### Эксперименты (`test_suite_minimization/experiments`)
 
 | Файл | Назначение |
 |---|---|
-| `README.md` | Протокол генерации снимка и независимого запуска редукторов. |
+| `README.md` | Протокол генерации снимка и независимого запуска алгоритмов сокращения тестового набора. |
 | `FORMAT.md` | Формат JSON-обмена между Java, C++ и PostgreSQL-валидатором. |
 | `LAUNCH_STATUS.md` | Журнал первоначальной диагностики запуска Java-эксперимента. |
 | `schema.sql` | SQL-схема для проверочных сценариев. |
 | `manual_null_oracle.sql` | Проверка семантики CHECK при NULL. |
 | `example-data/avsDefaults-seed0/` | Реальные `.ser`, JSON, C++-отчёт, SQL-схема и результаты PostgreSQL для воспроизводимого примера. |
-| `run_cpp_checks.ps1` | Сборка и тестирование C++-редуктора из PowerShell. |
-| `run_matrix.ps1` | Запуск матрицы генераторов и редукторов на независимых снимках. |
+| `run_cpp_checks.ps1` | Сборка и тестирование C++-алгоритма сокращения тестового набора из PowerShell. |
+| `run_matrix.ps1` | Запуск матрицы генераторов и алгоритмов сокращения на независимых снимках. |
 | `validate_postgres.ps1` | Выполнение тестов в PostgreSQL и сохранение результата, SQLSTATE и ограничения. |
 | `fixtures/basic.json` | Минимальная фикстура JSON для C++-проверки. |
 | `fixtures/postgres-boundaries.json` | Фикстура с граничными сравнениями и PostgreSQL evidence. |
@@ -174,7 +174,7 @@ Java-зависимостей не создаётся.
 .\SchemaAnalyst\gradlew.bat -p .\SchemaAnalyst test --offline --no-daemon
 ```
 
-C++ редуктор и зарегистрированный CTest можно собрать и проверить скриптом:
+C++-алгоритм сокращения тестового набора и зарегистрированный CTest можно собрать и проверить скриптом:
 
 ```powershell
 .\test_suite_minimization\experiments\run_cpp_checks.ps1

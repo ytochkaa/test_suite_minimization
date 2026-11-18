@@ -4,7 +4,7 @@
 
 ## Реализованные компоненты
 
-- Java-обвязки `GenerateBaselineSnapshot`, `ExportBaselineJson` и `RunSnapshotReducer` сохраняют один исходный `.ser`, экспортируют JSON и независимо перечитывают исходный снимок для каждого редуктора.
+- Java-обвязки `GenerateBaselineSnapshot`, `ExportBaselineJson` и `RunSnapshotReducer` сохраняют один исходный `.ser`, экспортируют JSON и независимо перечитывают исходный снимок для каждого алгоритма сокращения.
 - Схема содержит таблицы-связки `employee_laboratories`, `vending_machines_goods` и `users_equipment`; числовые CHECK на остаток и вместимость образуют сравнения `x op c` и `x op y`.
 - C++ `boundaryAware` строит покрытие исходных требований и подтверждённых границ, выбирает набор и проверяет его на том же входном наборе.
 - `validate_postgres.ps1` выполняет `state` и `data` в отдельном состоянии схемы для каждого теста, сохраняет SQLSTATE и имя CHECK.
